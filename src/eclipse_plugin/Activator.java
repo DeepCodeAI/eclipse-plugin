@@ -17,6 +17,11 @@ public class Activator implements BundleActivator {
 		Activator.context = bundleContext;
 
 		   IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		   for (IProject project : workspace.getRoot().getProjects()) {
+			   if (project.isAccessible()) {
+				   System.out.println("Projects: " + project);
+			   }
+		   }
 		   IResourceChangeListener listener = new IResourceChangeListener() {
 		      public void resourceChanged(IResourceChangeEvent event) {
 		         System.out.println("Something changed: " + event);

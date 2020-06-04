@@ -11,4 +11,18 @@
       </fragment>
    </extension>
 
+	<extension point="org.eclipse.ui.views">
+		<category
+			name="myProblemsView"
+			id="ai.deepcode">
+		</category>
+		<view
+			name="myProblemsView"
+			icon="icons/Sample.png"
+			category="ai.deepcode"
+			class="ai.deepcode.parts.myProblemsView"
+			id="ai.deepcode.parts.myProblemsView">
+		</view>
+	</extension>
+	
 </plugin>
