@@ -25,4 +25,22 @@
 		</view>
 	</extension>
 	
+	<extension	point="org.eclipse.ui.commands">
+      <command
+            id="ai.deepcode.analyse"
+            defaultHandler="ai.deepcode.handlers.AnalysisHandler"
+            name="Full analysis">
+      </command>
+	</extension>
+	
+    <extension point="org.eclipse.ui.menus">
+	  <menuContribution locationURI="toolbar:ai.deepcode.parts.myProblemsView?after=additions">
+         <command
+               commandId="ai.deepcode.analyse"
+               icon="icons/show.png"
+               tooltip="Run full analysis">
+         </command>
+      </menuContribution>
+	</extension>
+
 </plugin>
