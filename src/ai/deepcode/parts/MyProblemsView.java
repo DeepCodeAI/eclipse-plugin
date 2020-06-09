@@ -13,8 +13,8 @@ import org.eclipse.ui.views.markers.internal.MarkerMessages;
 import org.eclipse.ui.views.markers.internal.MarkerSupportRegistry;
 
 @SuppressWarnings("restriction")
-public class myProblemsView extends MarkerSupportView {
-	public myProblemsView() {
+public class MyProblemsView extends MarkerSupportView {
+	public MyProblemsView() {
 		super(MarkerSupportRegistry.PROBLEMS_GENERATOR);
 	}
 

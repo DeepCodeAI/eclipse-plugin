@@ -20,7 +20,7 @@
 			name="myProblemsView"
 			icon="icons/Sample.png"
 			category="ai.deepcode"
-			class="ai.deepcode.parts.myProblemsView"
+			class="ai.deepcode.parts.MyProblemsView"
 			id="ai.deepcode.parts.myProblemsView">
 		</view>
 	</extension>
@@ -41,6 +41,24 @@
                tooltip="Run full analysis">
          </command>
       </menuContribution>
+	  <menuContribution locationURI="toolbar:org.eclipse.ui.views.ProblemView?after=additions">
+         <command
+               commandId="ai.deepcode.analyse"
+               icon="icons/show.png"
+               tooltip="Run full analysis">
+         </command>
+      </menuContribution>
 	</extension>
+    <extension
+          id="deepcodemarker"
+          name="DeepCode"
+          point="org.eclipse.core.resources.markers">
+       <persistent
+             value="false">
+       </persistent>
+       <super
+             type="org.eclipse.core.resources.problemmarker">
+       </super>
+    </extension>
 
 </plugin>
