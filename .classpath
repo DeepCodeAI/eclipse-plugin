@@ -7,6 +7,6 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="libs/java-client-0.0.13-all.jar" sourcepath="D:/IdeaProjects/java-client/src/main"/>
+	<classpathentry kind="lib" path="libs/java-client-2.0.0-all.jar" sourcepath="D:/IdeaProjects/java-client/src/main/java"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

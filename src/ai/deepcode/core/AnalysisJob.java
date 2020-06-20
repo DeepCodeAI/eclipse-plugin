@@ -8,6 +8,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,219 +44,169 @@ import ai.deepcode.javaclient.responses.GetAnalysisResponse;
 import ai.deepcode.javaclient.responses.Suggestion;
 import ai.deepcode.javaclient.responses.Suggestions;
 
+import static ai.deepcode.core.DCLogger.info;
+import static ai.deepcode.core.DCLogger.warn;
+
 public class AnalysisJob extends Job {
 
-	private static final String loggedToken = "aeedc7d1c2656ea4b0adb1e215999f588b457cedf415c832a0209c9429c7636e";
+  private static final DCLogger dcLogger = DCLogger.getInstance();
+  // FIXME
+  private static final String loggedToken = "aeedc7d1c2656ea4b0adb1e215999f588b457cedf415c832a0209c9429c7636e";
 
-	public AnalysisJob(String name) {
-		super(name);
-		// TODO Auto-generated constructor stub
-	}
+  public AnalysisJob(String name) {
+    super(name);
+    // TODO Auto-generated constructor stub
+  }
 
-	@Override
-	protected IStatus run(IProgressMonitor monitor) {
-		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		for (IProject project : workspace.getRoot().getProjects()) {
-			if (!project.isAccessible())
-				continue;
-			System.out.println("------ Active Project: " + project);
+  @Override
+  protected IStatus run(IProgressMonitor monitor) {
+    IWorkspace workspace = ResourcesPlugin.getWorkspace();
+    for (IProject project : workspace.getRoot().getProjects()) {
+      if (!project.isAccessible())
+        continue;
+      dcLogger.logInfo("------ Active Project: " + project);
 
-			Map<IResource, FileContent> filesToProcced = new HashMap<IResource, FileContent>();
-			try {
-				project.accept(new IResourceVisitor() {
-					@Override
-					public boolean visit(IResource resource) throws CoreException {
-						if (resource instanceof IFile) {
-							IFile file = (IFile) resource;
-							if (isSupportedFile(file)) {
-								String filePath = getDeepCodedFilePath(file);
-								System.out.println(filePath);
-								String fileContent = getFileContent(file);
-								// System.out.println(fileContent);
+      Collection<IResource> filesToProcced = getAllFilesSupported(project);
 
-								filesToProcced.put(resource, new FileContent(filePath, fileContent));
-							}
-							return false;
-						}
-						return true;
-					}
-				});
-			} catch (CoreException e) {
-				System.out.println(e);
-			}
+      final FileHashRequest fileHashRequest = new FileHashRequest(
+          filesToProcced.stream().collect(Collectors.toMap(f -> HashContentUtils.getDeepCodedFilePath(f), f -> HashContentUtils.getHash(f))));
+      final CreateBundleResponse createBundleResponse = DeepCodeRestApi.createBundle(loggedToken, fileHashRequest);
 
-			final CreateBundleResponse createBundleResponse = DeepCodeRestApi.createBundle(loggedToken,
-//					new FileContentRequest(new ArrayList<FileContent>(filesToProcced.values())));
-					new FileHashRequest(filesToProcced.values().stream().collect(
-							Collectors.toMap(FileContent::getFilePath, fc -> doGetHash(fc.getFileContent())))));
+      dcLogger.logInfo(
+          "\nCreate Bundle response: " + "\n status = " + createBundleResponse.getStatusDescription() + "\n bundleID = "
+              + createBundleResponse.getBundleId() + "\n missingFiles = " + createBundleResponse.getMissingFiles());
+      final String bundleId = createBundleResponse.getBundleId();
+      final List<String> missingFiles = createBundleResponse.getMissingFiles();
 
-			System.out
-					.println("\nCreate Bundle response: " + "\n status = " + createBundleResponse.getStatusDescription()
-							+ "\n bundleID = " + createBundleResponse.getBundleId() + "\n missingFiles = "
-							+ createBundleResponse.getMissingFiles());
-			final String bundleId = createBundleResponse.getBundleId();
-			final List<String> missingFiles = createBundleResponse.getMissingFiles();
+      List<FileHash2ContentRequest> listHash2Content = new ArrayList<>();
+      for (String path : missingFiles) {
+        String fileText =
+            HashContentUtils.getFileContent(filesToProcced.stream().filter(f -> HashContentUtils.getDeepCodedFilePath(f).equals(path)).findFirst().get());
+        listHash2Content.add(new FileHash2ContentRequest(HashContentUtils.getHash(fileText), fileText));
+      }
 
-			List<FileHash2ContentRequest> listHash2Content = new ArrayList<>();
-			for (String path : missingFiles) {
-				String fileText = filesToProcced.values().stream().filter(fc -> fc.getFilePath().equals(path))
-						.findFirst().get().getFileContent();
-				listHash2Content.add(new FileHash2ContentRequest(doGetHash(fileText), fileText));
-			}
-			
-			if (!listHash2Content.isEmpty()) {
-				EmptyResponse uploadFilesResponse =
-				        DeepCodeRestApi.UploadFiles(loggedToken, bundleId, listHash2Content);
-			}			
+      if (!listHash2Content.isEmpty()) {
+        EmptyResponse uploadFilesResponse = DeepCodeRestApi.UploadFiles(loggedToken, bundleId, listHash2Content);
+      }
 
-			GetAnalysisResponse response;
-			int counter = 0;
-			do {
-				if (counter > 0)
-					delay(1000);
-				response = DeepCodeRestApi.getAnalysis(loggedToken, bundleId, 1, false);
-				System.out.println(response.toString());
-				if (response.getStatusCode() != 200 || counter > 10)
-					break;
-				counter++;
-			} while (!response.getStatus().equals("DONE"));
+      GetAnalysisResponse response;
+      int counter = 0;
+      do {
+        if (counter > 0)
+          delay(1000);
+        response = DeepCodeRestApi.getAnalysis(loggedToken, bundleId, 1, false);
+        dcLogger.logInfo(response.toString());
+        if (response.getStatusCode() != 200 || counter > 10)
+          break;
+        counter++;
+      } while (!response.getStatus().equals("DONE"));
 
-			reportAnalysisResults(filesToProcced.keySet(), response.getAnalysisResults());
+      reportAnalysisResults(filesToProcced, response.getAnalysisResults());
 
-		}
-		return Status.OK_STATUS;
-	}
+    }
+    return Status.OK_STATUS;
+  }
 
-	private void reportAnalysisResults(Set<IResource> files, AnalysisResults analysisResults) {
-		files.forEach(f -> {
-			try {
-				f.deleteMarkers("ai.deepcode.deepcodemarker", true, IResource.DEPTH_INFINITE);
-			} catch (CoreException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		});
-		final Suggestions suggestions = analysisResults.getSuggestions();
-		if (suggestions == null) {
-			System.out.println("Suggestions is empty for: " + analysisResults);
-			return;
-		}
-		for (IResource file : files) {
-			FileSuggestions fileSuggestions = analysisResults.getFiles().get(getDeepCodedFilePath(file));
-			if (fileSuggestions == null) {
-				continue;
-			}
-			for (String suggestionIndex : fileSuggestions.keySet()) {
-				final Suggestion suggestion = suggestions.get(suggestionIndex);
-				if (suggestion == null) {
-					System.out.println("Suggestion not found for suggestionIndex: " + suggestionIndex
-							+ "\nanalysisResults: " + analysisResults);
-					continue;
-				}
-				for (FileRange fileRange : fileSuggestions.get(suggestionIndex)) {
-					final int startRow = fileRange.getRows().get(0);
-					final int endRow = fileRange.getRows().get(1);
-					final int startCol = fileRange.getCols().get(0) - 1; // inclusive
-					final int endCol = fileRange.getCols().get(1);
+  private Collection<IResource> getAllFilesSupported(IProject project) {
+    Collection<IResource> filesToProcced = new ArrayList<>();
+    try {
+      project.accept(new IResourceVisitor() {
+        @Override
+        public boolean visit(IResource resource) throws CoreException {
+          if (resource instanceof IFile) {
+            IFile file = (IFile) resource;
+            if (isSupportedFile(file)) {
+              filesToProcced.add(resource);
+            }
+            return false;
+          }
+          return true;
+        }
+      });
+    } catch (CoreException e) {
+      warn(e.toString());
+    }
+    return filesToProcced;
+  }
 
-					try {
-						IMarker m = file.createMarker("ai.deepcode.deepcodemarker");
+  private void reportAnalysisResults(Collection<IResource> files, AnalysisResults analysisResults) {
+    files.forEach(f -> {
+      try {
+        f.deleteMarkers("ai.deepcode.deepcodemarker", true, IResource.DEPTH_INFINITE);
+      } catch (CoreException e1) {
+        // TODO Auto-generated catch block
+        e1.printStackTrace();
+      }
+    });
+    final Suggestions suggestions = analysisResults.getSuggestions();
+    if (suggestions == null) {
+      warn("Suggestions is empty for: " + analysisResults);
+      return;
+    }
+    for (IResource file : files) {
+      FileSuggestions fileSuggestions = analysisResults.getFiles().get(HashContentUtils.getDeepCodedFilePath(file));
+      if (fileSuggestions == null) {
+        continue;
+      }
+      for (String suggestionIndex : fileSuggestions.keySet()) {
+        final Suggestion suggestion = suggestions.get(suggestionIndex);
+        if (suggestion == null) {
+          warn(
+              "Suggestion not found for suggestionIndex: " + suggestionIndex + "\nanalysisResults: " + analysisResults);
+          continue;
+        }
+        for (FileRange fileRange : fileSuggestions.get(suggestionIndex)) {
+          final int startRow = fileRange.getRows().get(0);
+          final int endRow = fileRange.getRows().get(1);
+          final int startCol = fileRange.getCols().get(0) - 1; // inclusive
+          final int endCol = fileRange.getCols().get(1);
 
-						m.setAttribute(IMarker.LINE_NUMBER, startRow);
-						// file have to be opened in the editor to get it Document
-//						ITextFileBufferManager manager = FileBuffers.getTextFileBufferManager();
-//						ITextFileBuffer textFileBuffer = manager.getTextFileBuffer(file.getFullPath(),
-//								LocationKind.IFILE);
-//						IDocument document = textFileBuffer.getDocument();
+          try {
+            IMarker m = file.createMarker("ai.deepcode.deepcodemarker");
 
-						int lineOffset = 0;
-						lineOffset = getLineOffset(startRow, getFileContent(file));
-						m.setAttribute(IMarker.CHAR_START, lineOffset + startCol);
-						lineOffset = getLineOffset(endRow, getFileContent(file));
-						m.setAttribute(IMarker.CHAR_END, lineOffset + endCol);
+            m.setAttribute(IMarker.LINE_NUMBER, startRow);
+            // file have to be opened in the editor to get it Document
+            // ITextFileBufferManager manager = FileBuffers.getTextFileBufferManager();
+            // ITextFileBuffer textFileBuffer = manager.getTextFileBuffer(file.getFullPath(),
+            // LocationKind.IFILE);
+            // IDocument document = textFileBuffer.getDocument();
 
-						m.setAttribute(IMarker.MESSAGE, "DeepCode: " + suggestion.getMessage());
-						m.setAttribute(IMarker.SEVERITY, suggestion.getSeverity() - 1);
-					} catch (CoreException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-	}
+            int lineOffset = 0;
+            lineOffset = HashContentUtils.getLineOffset(startRow, HashContentUtils.getFileContent(file));
+            m.setAttribute(IMarker.CHAR_START, lineOffset + startCol);
+            lineOffset = HashContentUtils.getLineOffset(endRow, HashContentUtils.getFileContent(file));
+            m.setAttribute(IMarker.CHAR_END, lineOffset + endCol);
 
-	private String getDeepCodedFilePath(IResource file) {
-		String filePath = file.getProjectRelativePath().toString();
-		if (!filePath.startsWith("/"))
-			filePath = "/" + filePath;
-		return filePath;
-	}
+            m.setAttribute(IMarker.MESSAGE, "DeepCode: " + suggestion.getMessage());
+            m.setAttribute(IMarker.SEVERITY, suggestion.getSeverity() - 1);
+          } catch (CoreException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+      }
+    }
+  }
 
-	public static void delay(long millis) {
-		try {
-			Thread.sleep(millis);
-		} catch (InterruptedException e) {
-			System.out.println("InterruptedException: " + e.getMessage());
-			Thread.currentThread().interrupt();
-		}
-	}
+  public static void delay(long millis) {
+    try {
+      Thread.sleep(millis);
+    } catch (InterruptedException e) {
+      warn("InterruptedException: " + e.getMessage());
+      Thread.currentThread().interrupt();
+    }
+  }
 
-	private static Set<String> supportedExtensions = new HashSet<>(Arrays.asList("cc", "htm", "cpp", "cxx", "c", "vue",
-			"h", "hpp", "hxx", "es6", "js", "py", "es", "jsx", "java", "tsx", "html", "ts"));
-	private static Set<String> supportedConfigFiles = new HashSet<>(
-			Arrays.asList("pylintrc", "ruleset.xml", ".eslintrc.json", ".pylintrc", ".eslintrc.js", "tslint.json",
-					".pmdrc.xml", ".ruleset.xml", ".eslintrc.yml"));
-	private static final long MAX_FILE_SIZE = 5242880; // 5MB in bytes
+  private static Set<String> supportedExtensions = new HashSet<>(Arrays.asList("cc", "htm", "cpp", "cxx", "c", "vue",
+      "h", "hpp", "hxx", "es6", "js", "py", "es", "jsx", "java", "tsx", "html", "ts"));
+  private static Set<String> supportedConfigFiles = new HashSet<>(Arrays.asList("pylintrc", "ruleset.xml",
+      ".eslintrc.json", ".pylintrc", ".eslintrc.js", "tslint.json", ".pmdrc.xml", ".ruleset.xml", ".eslintrc.yml"));
+  private static final long MAX_FILE_SIZE = 5242880; // 5MB in bytes
 
-	private boolean isSupportedFile(IFile file) {
-		return (supportedExtensions.contains(file.getFileExtension()) || supportedConfigFiles.contains(file.getName()))
-				&& file.getLocation().toFile().length() < MAX_FILE_SIZE;
-	}
-
-	private static final Map<IResource, String> FILE2CONTENT_MAP = new ConcurrentHashMap<IResource, String>();
-
-	private String getFileContent(IResource file) {
-		return FILE2CONTENT_MAP.computeIfAbsent(file, f -> {
-			try {
-				// System.out.println(Paths.get(file.getLocationURI()));
-				return Files.readString(Paths.get(f.getLocationURI()));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		});
-	}
-
-	private static int getLineOffset(int lineNum, String fileContent) {
-		int prevLineNum = lineNum - 1;
-//		fileContent.lines().limit(prevLineNum).forEach(s -> System.out.println(s.length() + s));
-		// TODO optimize
-		int lineSeparatorLength = fileContent.indexOf("\r\n") == -1 ? 1 : 2;
-		return fileContent.lines().limit(prevLineNum).mapToInt(String::length).sum()
-				+ prevLineNum * lineSeparatorLength; // `\n`|`\r`|`\r\n` should be counted
-	}
-
-	private static String doGetHash(String fileText) {
-		MessageDigest messageDigest;
-		try {
-			messageDigest = MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
-		}
-		byte[] encodedHash = messageDigest.digest(fileText.getBytes(StandardCharsets.UTF_8));
-		return bytesToHex(encodedHash);
-	}
-
-	// https://www.baeldung.com/sha-256-hashing-java#message-digest
-	private static String bytesToHex(byte[] hash) {
-		StringBuilder hexString = new StringBuilder();
-		for (byte b : hash) {
-			String hex = Integer.toHexString(0xff & b);
-			if (hex.length() == 1)
-				hexString.append('0');
-			hexString.append(hex);
-		}
-		return hexString.toString();
-	}
+  // FIXME
+  private boolean isSupportedFile(IFile file) {
+    return (supportedExtensions.contains(file.getFileExtension()) || supportedConfigFiles.contains(file.getName()))
+        && file.getLocation().toFile().length() < MAX_FILE_SIZE;
+  }
 
 }
