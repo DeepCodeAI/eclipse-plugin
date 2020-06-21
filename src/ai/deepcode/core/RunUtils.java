@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -26,20 +27,20 @@ public final class RunUtils {
 
   private static class MyJob extends Job {
 
-    private Runnable runnable;
+    private Consumer<Object> progressConsumer;
     private IProject project;
 
-    public MyJob(String name, @NotNull IProject project, @NotNull Runnable runnable) {
+    public MyJob(String name, @NotNull IProject project, @NotNull Consumer<Object> progressConsumer) {
       super(name);
       this.project = project;
-      this.runnable = runnable;
+      this.progressConsumer = progressConsumer;
     }
 
     @Override
     protected IStatus run(IProgressMonitor monitor) {
       dcLogger.logInfo("New Process started at " + project);
       getRunningIndicators(project).add(monitor);
-      runnable.run();
+      progressConsumer.accept(monitor);
       dcLogger.logInfo("Process ending at " + project);
       getRunningIndicators(project).remove(monitor);
       return null;
@@ -47,15 +48,15 @@ public final class RunUtils {
 
   }
 
-  public static void runInBackground(@NotNull IProject project, @NotNull Runnable runnable) {
+  public static void runInBackground(@NotNull IProject project, @NotNull Consumer<Object> progressConsumer) {
     dcLogger.logInfo("runInBackground requested");
-    new MyJob("DeepCode runInBackground running...", project, runnable).schedule();
+    new MyJob("DeepCode runInBackground running...", project, progressConsumer).schedule();
   }
 
-  public static void runInBackgroundCancellable(@NotNull IFile file, @NotNull Runnable runnable) {
+  public static void runInBackgroundCancellable(@NotNull IFile file, @NotNull Consumer<Object> progressConsumer) {
     dcLogger.logInfo("runInBackgroundCancellable requested");
     // TODO make it cancellable
-    new MyJob("DeepCode runInBackgroundCancellable running...", file.getProject(), runnable).schedule();
+    new MyJob("DeepCode runInBackgroundCancellable running...", file.getProject(), progressConsumer).schedule();
   }
 
   public static void cancelRunningIndicators(@NotNull IProject project) {
@@ -70,10 +71,10 @@ public final class RunUtils {
 
   public static void rescanInBackgroundCancellableDelayed(@NotNull IProject project, int delayMilliseconds) {
     dcLogger.logInfo("rescanInBackgroundCancellableDelayed requested for: " + project.getName());
-    new MyJob("DeepCode Rescan running...", project, () -> {
+    new MyJob("DeepCode Rescan running...", project, (progress) -> {
       AnalysisData.getInstance().removeProjectFromCaches(project);
       AnalysisData.getInstance().updateCachedResultsForFiles(project,
-          DeepCodeUtils.getInstance().getAllSupportedFilesInProject(project), Collections.emptyList());
+          DeepCodeUtils.getInstance().getAllSupportedFilesInProject(project), Collections.emptyList(), progress);
     }).schedule();
   }
 
