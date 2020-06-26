@@ -24,4 +24,4 @@ Import-Package: javax.annotation;version="1.2.0",
  org.eclipse.ui.browser
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
- libs/java-client-2.0.2-all.jar
+ libs/java-client-2.0.dev.jar

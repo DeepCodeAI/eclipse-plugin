@@ -1,81 +1,116 @@
 package ai.deepcode.core;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.jetbrains.annotations.NotNull;
+import ai.deepcode.javaclient.core.MyTextRange;
+import ai.deepcode.javaclient.core.RunUtilsBase;
+import ai.deepcode.javaclient.core.SuggestionForFile;
 
-// TODO generalize RunUtils
-public final class RunUtils {
+public final class RunUtils extends RunUtilsBase {
 
-  private static final DCLogger dcLogger = DCLogger.getInstance();
+  private static final RunUtils INSTANCE = new RunUtils();
 
-  private static final Map<IProject, Set<IProgressMonitor>> mapProject2Monitors = new ConcurrentHashMap<>();
-
-  private static synchronized Set<IProgressMonitor> getRunningIndicators(@NotNull IProject project) {
-    return mapProject2Monitors.computeIfAbsent(project, p -> new HashSet<>());
+  public static RunUtils getInstance() {
+    return INSTANCE;
   }
 
-  private static class MyJob extends Job {
+  private RunUtils() {
+    super(
+        PDU.getInstance(),
+        HashContentUtils.getInstance(),
+        AnalysisData.getInstance(),
+        DeepCodeUtils.getInstance(),
+        DCLogger.getInstance());
+  }
+
+  private class MyJob extends Job {
 
     private Consumer<Object> progressConsumer;
     private IProject project;
 
-    public MyJob(String name, @NotNull IProject project, @NotNull Consumer<Object> progressConsumer) {
-      super(name);
+    public MyJob(@NotNull IProject project, @NotNull String title, @NotNull Consumer<Object> progressConsumer) {
+      super(title);
       this.project = project;
       this.progressConsumer = progressConsumer;
     }
 
     @Override
     protected IStatus run(IProgressMonitor monitor) {
-      dcLogger.logInfo("New Process started at " + project);
-      getRunningIndicators(project).add(monitor);
       progressConsumer.accept(monitor);
-      dcLogger.logInfo("Process ending at " + project);
-      getRunningIndicators(project).remove(monitor);
-      return null;
+      return Status.OK_STATUS;
     }
 
   }
 
-  public static void runInBackground(@NotNull IProject project, @NotNull Consumer<Object> progressConsumer) {
-    dcLogger.logInfo("runInBackground requested");
-    new MyJob("DeepCode runInBackground running...", project, progressConsumer).schedule();
+  @Override
+  protected boolean reuseCurrentProgress(@NotNull Object project, @NotNull String title,
+      @NotNull Consumer<Object> progressConsumer) {
+    // TODO Auto-generated method stub    
+   return false;
   }
 
-  public static void runInBackgroundCancellable(@NotNull IFile file, @NotNull Consumer<Object> progressConsumer) {
-    dcLogger.logInfo("runInBackgroundCancellable requested");
-    // TODO make it cancellable
-    new MyJob("DeepCode runInBackgroundCancellable running...", file.getProject(), progressConsumer).schedule();
+  @Override
+  protected void doBackgroundRun(@NotNull Object project, @NotNull String title,
+      @NotNull Consumer<Object> progressConsumer) {
+    new MyJob(PDU.toProject(project), title, progressConsumer).schedule();
   }
 
-  public static void cancelRunningIndicators(@NotNull IProject project) {
-    String indicatorsList =
-        getRunningIndicators(project).stream().map(IProgressMonitor::toString).collect(Collectors.joining("\n"));
-    dcLogger.logInfo("Canceling ProgressIndicators:\n" + indicatorsList);
-    // in case any indicator holds Bulk mode process
-    getRunningIndicators(project).forEach(IProgressMonitor::done);
-    getRunningIndicators(project).clear();
-    // projectsWithFullRescanRequested.remove(project);
+  @NotNull
+  private static IProgressMonitor toProgress(@NotNull Object progress) {
+    if (!(progress instanceof IProgressMonitor))
+      throw new IllegalArgumentException("progress should be IProgressMonitor instance");
+    return (IProgressMonitor) progress;
   }
 
-  public static void rescanInBackgroundCancellableDelayed(@NotNull IProject project, int delayMilliseconds) {
-    dcLogger.logInfo("rescanInBackgroundCancellableDelayed requested for: " + project.getName());
-    new MyJob("DeepCode Rescan running...", project, (progress) -> {
-      AnalysisData.getInstance().removeProjectFromCaches(project);
-      AnalysisData.getInstance().updateCachedResultsForFiles(project,
-          DeepCodeUtils.getInstance().getAllSupportedFilesInProject(project), Collections.emptyList(), progress);
-    }).schedule();
+  @Override
+  protected void cancelProgress(@NotNull Object progress) {
+    toProgress(progress).done();
+  }
+
+  @Override
+  protected void bulkModeForceUnset(@NotNull Object project) {
+    // TODO Auto-generated method stub    
+  }
+
+  @Override
+  protected void bulkModeUnset(@NotNull Object project) {
+    // TODO Auto-generated method stub    
+  }
+
+  @Override
+  protected Object[] getOpenProjects() {
+    return ResourcesPlugin.getWorkspace().getRoot().getProjects();
+  }
+
+  @Override
+  protected void updateUI(Object project) {
+    for (Object file : AnalysisData.getInstance().getAllFilesWithSuggestions(project)) {
+      for (SuggestionForFile suggestion : AnalysisData.getInstance().getAnalysis(file)) {
+        for (MyTextRange range : suggestion.getRanges()) {
+          try {
+            IMarker m = PDU.toIFile(file).createMarker("ai.deepcode.deepcodemarker");
+
+            m.setAttribute(IMarker.LINE_NUMBER, range.getStartRow());
+            m.setAttribute(IMarker.CHAR_START, range.getStart());
+            m.setAttribute(IMarker.CHAR_END, range.getEnd());
+            String prefix = "(" + range.getStartRow() + ":" + (range.getStartCol() + 1) + ")" + " DeepCode: ";
+            m.setAttribute(IMarker.MESSAGE, prefix + suggestion.getMessage());
+            m.setAttribute(IMarker.SEVERITY, suggestion.getSeverity() - 1);
+          } catch (CoreException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+      }
+    }
   }
 
 }

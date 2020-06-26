@@ -13,13 +13,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.browser.IWebBrowser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ai.deepcode.javaclient.core.PlatformDependentUtilsBase;
-import jdk.nashorn.tools.Shell;
 
 public class PDU extends PlatformDependentUtilsBase {
 
@@ -90,35 +89,34 @@ public class PDU extends PlatformDependentUtilsBase {
 
   @Override
   public int getLineStartOffset(@NotNull Object file, int line) {
-    int prevLineNum = line - 1;
     // TODO use cached content
     String fileContent = HashContentUtils.getInstance().doGetFileContent(file);
     // TODO optimize
     int lineSeparatorLength = fileContent.indexOf("\r\n") == -1 ? 1 : 2;
     // `\n`|`\r`|`\r\n` should be also counted
-    return fileContent.lines().limit(prevLineNum).mapToInt(String::length).sum() + prevLineNum * lineSeparatorLength;
+    return fileContent.lines().limit(line).mapToInt(String::length).sum() + line * lineSeparatorLength;
   }
 
   @Override
   public void runInBackgroundCancellable(@NotNull Object file, @NotNull String title,
       @NotNull Consumer<Object> progressConsumer) {
-    RunUtils.runInBackgroundCancellable(toIFile(file), progressConsumer);
+    RunUtils.getInstance().runInBackgroundCancellable(file, title, progressConsumer);
   }
 
   @Override
   public void runInBackground(@NotNull Object project, @NotNull String title,
       @NotNull Consumer<Object> progressConsumer) {
-    RunUtils.runInBackground(toProject(project), progressConsumer);
+    RunUtils.getInstance().runInBackground(project, title, progressConsumer);
   }
 
   @Override
   public void cancelRunningIndicators(@NotNull Object project) {
-    RunUtils.cancelRunningIndicators(toProject(project));
+    RunUtils.getInstance().cancelRunningIndicators(project);
   }
 
   @Override
   public void doFullRescan(@NotNull Object project) {
-    RunUtils.rescanInBackgroundCancellableDelayed(toProject(project), DEFAULT_DELAY_SMALL);
+    RunUtils.getInstance().rescanInBackgroundCancellableDelayed(project, DEFAULT_DELAY_SMALL, false);
   }
 
   @Override
@@ -164,36 +162,50 @@ public class PDU extends PlatformDependentUtilsBase {
     }
   }
 
+  private void runInUIThread(Consumer<Shell> consumer) {
+    PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
+      Shell activeShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+      consumer.accept(activeShell);
+    });
+  }
+
   @Override
   public void showLoginLink(Object project, String message) {
-    if (MessageDialog.openConfirm(null, "Login", message)) {
-      LoginUtils.getInstance().requestNewLogin(project, true);
-    };
+    runInUIThread((shell) -> {
+      if (MessageDialog.openConfirm(shell, "Login", message)) {
+        LoginUtils.getInstance().requestNewLogin(project, true);
+      } ;
+    });
   }
 
   @Override
   public void showConsentRequest(Object project, boolean userActionNeeded) {
-    if (MessageDialog.openConfirm(null, "Confirm", "Consent request")) {
-      DeepCodeParams.getInstance().setConsentGiven(project);
-    };
+    runInUIThread((shell) -> {
+      if (MessageDialog.openConfirm(shell, "Confirm", "Consent request")) {
+        DeepCodeParams.getInstance().setConsentGiven(project);
+      } ;
+    });
   }
 
   @Override
   public void showInfo(String message, Object project) {
-    MessageDialog.openInformation(null, "Info", message);
-//    PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-//      public void run() {
-//          Shell activeShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-//      }
-//    });    
+    runInUIThread((shell) -> {
+      MessageDialog.openInformation(shell, "Info", message);
+    });
   }
 
   @Override
   public void showWarn(String message, Object project) {
-    MessageDialog.openWarning(null, "Warning", message);  }
+    runInUIThread((shell) -> {
+      MessageDialog.openWarning(shell, "Warning", message);
+    });
+  }
 
   @Override
   public void showError(String message, Object project) {
-    MessageDialog.openError(null, "Error", message);  }
+    runInUIThread((shell) -> {
+      MessageDialog.openError(shell, "Error", message);
+    });
+  }
 
 }

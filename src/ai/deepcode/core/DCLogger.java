@@ -1,8 +1,5 @@
 package ai.deepcode.core;
 
-import java.text.SimpleDateFormat;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import ai.deepcode.javaclient.core.DCLoggerBase;
 
 public class DCLogger extends DCLoggerBase {
@@ -19,7 +16,7 @@ public class DCLogger extends DCLoggerBase {
 
   @Override
   protected String getExtraInfo() {
-    return "";
+    return " [" + Thread.currentThread().getName() + "] ";
   }
 
 }
