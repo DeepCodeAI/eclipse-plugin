@@ -1,8 +1,10 @@
 package ai.deepcode.core;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -91,13 +93,13 @@ public final class RunUtils extends RunUtilsBase {
   }
 
   @Override
-  protected void updateUI(Object project) {
-    for (Object file : AnalysisData.getInstance().getAllFilesWithSuggestions(project)) {
+  protected void updateAnalysisResultsUIPresentation(@NotNull Collection<Object> files) {
+    for (Object file : files) {           
       for (SuggestionForFile suggestion : AnalysisData.getInstance().getAnalysis(file)) {
         for (MyTextRange range : suggestion.getRanges()) {
           try {
             IMarker m = PDU.toIFile(file).createMarker("ai.deepcode.deepcodemarker");
-
+            
             m.setAttribute(IMarker.LINE_NUMBER, range.getStartRow());
             m.setAttribute(IMarker.CHAR_START, range.getStart());
             m.setAttribute(IMarker.CHAR_END, range.getEnd());
@@ -105,8 +107,7 @@ public final class RunUtils extends RunUtilsBase {
             m.setAttribute(IMarker.MESSAGE, prefix + suggestion.getMessage());
             m.setAttribute(IMarker.SEVERITY, suggestion.getSeverity() - 1);
           } catch (CoreException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            dcLogger.logWarn(e.getMessage());;
           }
         }
       }

@@ -16,7 +16,7 @@ public class DCLogger extends DCLoggerBase {
 
   @Override
   protected String getExtraInfo() {
-    return " [" + Thread.currentThread().getName() + "] ";
+    return "[" + Thread.currentThread().getName() + "] \n";
   }
 
 }
