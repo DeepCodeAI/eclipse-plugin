@@ -1,14 +1,8 @@
 package ai.deepcode.core;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.eclipse.core.resources.IResource;
 import org.jetbrains.annotations.NotNull;
 import ai.deepcode.javaclient.core.HashContentUtilsBase;
 import ai.deepcode.javaclient.core.PlatformDependentUtilsBase;

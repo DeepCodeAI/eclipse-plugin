@@ -89,13 +89,39 @@ public class PDU extends PlatformDependentUtilsBase {
 
   @Override
   public int getLineStartOffset(@NotNull Object file, int line) {
-    // TODO use cached content
-    String fileContent = HashContentUtils.getInstance().doGetFileContent(file);
-    // TODO optimize
-    int lineSeparatorLength = fileContent.indexOf("\r\n") == -1 ? 1 : 2;
-    // `\n`|`\r`|`\r\n` should be also counted
-    return fileContent.lines().limit(line).mapToInt(String::length).sum() + line * lineSeparatorLength;
+    String fileContent = HashContentUtils.getInstance().getFileContent(file);
+    int offset = 0;
+    for (String nextLine : fileContent.lines().limit(line).collect(Collectors.toList())) {
+      // TODO: for strings with special symbols (2,3, etc bytes per char) will be inaccurate.
+      // we might need to read file content in charset eclipse shows files (performance inefficient?)
+      offset += nextLine.length();
+      offset = addLineSeparatorOffset(fileContent, offset);
+    }
+    return offset;
+//    final String lineText = fileContent.lines().skip(line).findFirst().orElseThrow();
+//    int lineSeparatorLength = fileContent.indexOf("\r\n") == -1 ? 1 : 2;
+//    int estimatedOffset = fileContent.lines().limit(line).mapToInt(String::length).sum() 
+//        // `\n`|`\r`|`\r\n` should be also counted
+//        + line * lineSeparatorLength;
+//    // could be (?) mixed new line separators `\n`|`\r`|`\r\n`
+//    int exactOffset = estimatedOffset;
+//    return exactOffset;
   }
+  
+  // java.lang.StringUTF16.LinesSpliterator#skipLineSeparator
+  private int addLineSeparatorOffset(String value, int start) {
+    int fence = value.length() - 1;
+    if (start < fence) {
+        if (value.charAt(start) == '\r') {
+            int next = start + 1;
+            if (next < fence && value.charAt(next) == '\n') {
+                return next + 1;
+            }
+        }
+        return start + 1;
+    }
+    return fence;
+}
 
   @Override
   public void runInBackgroundCancellable(@NotNull Object file, @NotNull String title,

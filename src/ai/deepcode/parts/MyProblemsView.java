@@ -18,19 +18,18 @@ public class MyProblemsView extends MarkerSupportView {
 		super(MarkerSupportRegistry.PROBLEMS_GENERATOR);
 	}
 
-
-	@Override
-	void updateTitleImage(Integer[] counts) {
-		Image image= WorkbenchPlugin.getDefault().getSharedImages().getImage(IDEInternalWorkbenchImages.IMG_ETOOL_PROBLEMS_VIEW);
-		if (counts[0].intValue() > 0) {
-			image= WorkbenchPlugin.getDefault().getSharedImages().getImage(IDEInternalWorkbenchImages.IMG_ETOOL_PROBLEMS_VIEW_ERROR);
-		} else if (counts[1].intValue() > 0) {
-			image= WorkbenchPlugin.getDefault().getSharedImages().getImage(IDEInternalWorkbenchImages.IMG_ETOOL_PROBLEMS_VIEW_WARNING);
-		} else if (counts[2].intValue() > 0) {
-			image= WorkbenchPlugin.getDefault().getSharedImages().getImage(IDEInternalWorkbenchImages.IMG_ETOOL_PROBLEMS_VIEW_INFO);
-		}
-		setTitleImage(image);
-	}
+	//@Override
+//	void updateTitleImage(Integer[] counts) {
+//		Image image= WorkbenchPlugin.getDefault().getSharedImages().getImage(IDEInternalWorkbenchImages.IMG_ETOOL_PROBLEMS_VIEW);
+//		if (counts[0].intValue() > 0) {
+//			image= WorkbenchPlugin.getDefault().getSharedImages().getImage(IDEInternalWorkbenchImages.IMG_ETOOL_PROBLEMS_VIEW_ERROR);
+//		} else if (counts[1].intValue() > 0) {
+//			image= WorkbenchPlugin.getDefault().getSharedImages().getImage(IDEInternalWorkbenchImages.IMG_ETOOL_PROBLEMS_VIEW_WARNING);
+//		} else if (counts[2].intValue() > 0) {
+//			image= WorkbenchPlugin.getDefault().getSharedImages().getImage(IDEInternalWorkbenchImages.IMG_ETOOL_PROBLEMS_VIEW_INFO);
+//		}
+//		setTitleImage(image);
+//	}
 
 	@Override
 	protected IUndoContext getUndoContext() {

@@ -8,15 +8,11 @@ import ai.deepcode.core.DeepCodeUtils;
 import ai.deepcode.core.LoginUtils;
 import ai.deepcode.core.PDU;
 import ai.deepcode.core.RunUtils;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class Activator implements BundleActivator {
