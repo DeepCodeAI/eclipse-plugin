@@ -98,30 +98,30 @@ public class PDU extends PlatformDependentUtilsBase {
       offset = addLineSeparatorOffset(fileContent, offset);
     }
     return offset;
-//    final String lineText = fileContent.lines().skip(line).findFirst().orElseThrow();
-//    int lineSeparatorLength = fileContent.indexOf("\r\n") == -1 ? 1 : 2;
-//    int estimatedOffset = fileContent.lines().limit(line).mapToInt(String::length).sum() 
-//        // `\n`|`\r`|`\r\n` should be also counted
-//        + line * lineSeparatorLength;
-//    // could be (?) mixed new line separators `\n`|`\r`|`\r\n`
-//    int exactOffset = estimatedOffset;
-//    return exactOffset;
+    // final String lineText = fileContent.lines().skip(line).findFirst().orElseThrow();
+    // int lineSeparatorLength = fileContent.indexOf("\r\n") == -1 ? 1 : 2;
+    // int estimatedOffset = fileContent.lines().limit(line).mapToInt(String::length).sum()
+    // // `\n`|`\r`|`\r\n` should be also counted
+    // + line * lineSeparatorLength;
+    // // could be (?) mixed new line separators `\n`|`\r`|`\r\n`
+    // int exactOffset = estimatedOffset;
+    // return exactOffset;
   }
-  
+
   // java.lang.StringUTF16.LinesSpliterator#skipLineSeparator
   private int addLineSeparatorOffset(String value, int start) {
     int fence = value.length() - 1;
     if (start < fence) {
-        if (value.charAt(start) == '\r') {
-            int next = start + 1;
-            if (next < fence && value.charAt(next) == '\n') {
-                return next + 1;
-            }
+      if (value.charAt(start) == '\r') {
+        int next = start + 1;
+        if (next < fence && value.charAt(next) == '\n') {
+          return next + 1;
         }
-        return start + 1;
+      }
+      return start + 1;
     }
     return fence;
-}
+  }
 
   @Override
   public void runInBackgroundCancellable(@NotNull Object file, @NotNull String title,
@@ -195,20 +195,30 @@ public class PDU extends PlatformDependentUtilsBase {
     });
   }
 
+  private static final String title = "Deepcode: ";
+
   @Override
   public void showLoginLink(Object project, String message) {
     runInUIThread((shell) -> {
-      if (MessageDialog.openConfirm(shell, "Login", message)) {
+      if (MessageDialog.openConfirm(shell, title + "Login", message)) {
         LoginUtils.getInstance().requestNewLogin(project, true);
       } ;
     });
   }
 
+  private static boolean consentRequestShown = false;
+
   @Override
   public void showConsentRequest(Object project, boolean userActionNeeded) {
+    if (!userActionNeeded && consentRequestShown)
+      return;
+    consentRequestShown = true;
     runInUIThread((shell) -> {
-      if (MessageDialog.openConfirm(shell, "Confirm", "Consent request")) {
+      final String message = "Confirm remote analysis of " + PDU.getInstance().getProjectName(project)
+          + "\n(see Terms and Conditions at https://www.deepcode.ai/tc)";
+      if (MessageDialog.openConfirm(shell, title + "Consent confirmation.", message)) {
         DeepCodeParams.getInstance().setConsentGiven(project);
+        consentRequestShown = false;
       } ;
     });
   }
@@ -216,21 +226,21 @@ public class PDU extends PlatformDependentUtilsBase {
   @Override
   public void showInfo(String message, Object project) {
     runInUIThread((shell) -> {
-      MessageDialog.openInformation(shell, "Info", message);
+      MessageDialog.openInformation(shell, title + "Info", message);
     });
   }
 
   @Override
   public void showWarn(String message, Object project) {
     runInUIThread((shell) -> {
-      MessageDialog.openWarning(shell, "Warning", message);
+      MessageDialog.openWarning(shell, title + "Warning", message);
     });
   }
 
   @Override
   public void showError(String message, Object project) {
     runInUIThread((shell) -> {
-      MessageDialog.openError(shell, "Error", message);
+      MessageDialog.openError(shell, title + "Error", message);
     });
   }
 
