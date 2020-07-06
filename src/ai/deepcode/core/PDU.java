@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -75,6 +76,11 @@ public class PDU extends PlatformDependentUtilsBase {
   @Override
   protected @NotNull String getProjectBasedFilePath(@NotNull Object file) {
     return toIFile(file).getProjectRelativePath().toString();
+  }
+
+  @Override
+  public Object[] getOpenProjects() {
+     return ResourcesPlugin.getWorkspace().getRoot().getProjects();
   }
 
   @Override
@@ -150,9 +156,10 @@ public class PDU extends PlatformDependentUtilsBase {
     // TODO Auto-generated method stub
   }
 
+  // no direct call possible due to circular dependencies  
   @Override
   public boolean isLogged(@Nullable Object project, boolean userActionNeeded) {
-    return LoginUtils.getInstance().isLogged(project == null ? null : toProject(project), userActionNeeded);
+    return LoginUtils.getInstance().isLogged(project, userActionNeeded);
   }
 
   @Override

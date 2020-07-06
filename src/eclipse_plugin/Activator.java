@@ -92,8 +92,8 @@ public class Activator implements BundleActivator {
 
             private void projectOpened(@Nullable IProject project) {
               AnalysisData.getInstance().resetCachesAndTasks(project);
-              // Initial logging if needed.
-              if (LoginUtils.getInstance().isLogged(project, true)) {
+              // Initial silent logging check before analysis.
+              if (LoginUtils.getInstance().isLogged(project, false)) {
                 RunUtils.getInstance().asyncAnalyseProjectAndUpdatePanel(project);
               }
             }

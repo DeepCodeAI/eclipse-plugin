@@ -1,5 +1,6 @@
 package ai.deepcode.core;
 
+import org.jetbrains.annotations.Nullable;
 import ai.deepcode.javaclient.core.LoginUtilsBase;
 
 public final class LoginUtils extends LoginUtilsBase {
@@ -19,6 +20,18 @@ public final class LoginUtils extends LoginUtilsBase {
   // + ApplicationNamesInfo.getInstance().getProductName()
   // + "-"
   // + ApplicationInfo.getInstance().getFullVersion();
+
+//  private static boolean isNewLoginRequstShown = false;
+//
+//  @Override
+//  public boolean isLogged(@Nullable Object project, boolean userActionNeeded) {
+//    final boolean isLogged = super.isLogged(project, userActionNeeded && !isNewLoginRequstShown);
+//    if (!isLogged && userActionNeeded) // login request should be already shown, see super
+//      isNewLoginRequstShown = true;
+//    if (isLogged) // reset flag
+//      isNewLoginRequstShown = false;
+//    return isLogged;
+//  }
 
   @Override
   protected String getUserAgent() {

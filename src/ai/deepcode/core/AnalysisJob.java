@@ -16,16 +16,24 @@ public class AnalysisJob extends Job {
 
   private static final DCLogger dcLogger = DCLogger.getInstance();
 
+  // private static boolean isNewLoginRequstShown = false;
+
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
+    boolean isNewLoginRequstShown = false;
     for (IProject project : workspace.getRoot().getProjects()) {
       if (!project.isAccessible())
         continue;
       dcLogger.logInfo("Re-Analyse Project requested for: " + project);
       AnalysisData.getInstance().resetCachesAndTasks(project);
-      if (LoginUtils.getInstance().isLogged(project, true)) {
-        RunUtils.getInstance().asyncAnalyseProjectAndUpdatePanel(project);
+      if (!isNewLoginRequstShown) {
+        if (LoginUtils.getInstance().isLogged(project, true)) {
+          RunUtils.getInstance().asyncAnalyseProjectAndUpdatePanel(project);
+        } else {
+          // login request should be already shown, see isLogged()
+          isNewLoginRequstShown = true;
+        }
       }
     }
     return Status.OK_STATUS;
