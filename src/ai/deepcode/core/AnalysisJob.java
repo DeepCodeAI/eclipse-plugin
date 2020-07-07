@@ -21,19 +21,16 @@ public class AnalysisJob extends Job {
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    boolean isNewLoginRequstShown = false;
     for (IProject project : workspace.getRoot().getProjects()) {
       if (!project.isAccessible())
         continue;
       dcLogger.logInfo("Re-Analyse Project requested for: " + project);
       AnalysisData.getInstance().resetCachesAndTasks(project);
-      if (!isNewLoginRequstShown) {
-        if (LoginUtils.getInstance().isLogged(project, true)) {
-          RunUtils.getInstance().asyncAnalyseProjectAndUpdatePanel(project);
-        } else {
-          // login request should be already shown, see isLogged()
-          isNewLoginRequstShown = true;
-        }
+      if (!LoginUtils.getInstance().checkLogin(project, true)) {
+        break; // login request should be shown, see checkLogin(); no needs to traverse further
+      }
+      if (LoginUtils.getInstance().checkConsent(project, true)) {
+        RunUtils.getInstance().asyncAnalyseProjectAndUpdatePanel(project);
       }
     }
     return Status.OK_STATUS;

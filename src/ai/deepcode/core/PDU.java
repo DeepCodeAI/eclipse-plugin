@@ -2,8 +2,11 @@ package ai.deepcode.core;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.eclipse.core.filesystem.EFS;
@@ -17,6 +20,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.NewExampleAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ai.deepcode.javaclient.core.PlatformDependentUtilsBase;
@@ -80,7 +84,8 @@ public class PDU extends PlatformDependentUtilsBase {
 
   @Override
   public Object[] getOpenProjects() {
-     return ResourcesPlugin.getWorkspace().getRoot().getProjects();
+    final IProject[] allProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+    return Arrays.stream(allProjects).filter(IProject::isOpen).toArray();
   }
 
   @Override
@@ -156,7 +161,7 @@ public class PDU extends PlatformDependentUtilsBase {
     // TODO Auto-generated method stub
   }
 
-  // no direct call possible due to circular dependencies  
+  // no direct call possible due to circular dependencies
   @Override
   public boolean isLogged(@Nullable Object project, boolean userActionNeeded) {
     return LoginUtils.getInstance().isLogged(project, userActionNeeded);
@@ -213,19 +218,20 @@ public class PDU extends PlatformDependentUtilsBase {
     });
   }
 
-  private static boolean consentRequestShown = false;
+  private static final Set<Object> projectsWithConsentRequestShown = new HashSet<>();
 
   @Override
   public void showConsentRequest(Object project, boolean userActionNeeded) {
-    if (!userActionNeeded && consentRequestShown)
+    if (!userActionNeeded && projectsWithConsentRequestShown.contains(project))
       return;
-    consentRequestShown = true;
+    projectsWithConsentRequestShown.add(project);
     runInUIThread((shell) -> {
       final String message = "Confirm remote analysis of " + PDU.getInstance().getProjectName(project)
           + "\n(see Terms and Conditions at https://www.deepcode.ai/tc)";
       if (MessageDialog.openConfirm(shell, title + "Consent confirmation.", message)) {
         DeepCodeParams.getInstance().setConsentGiven(project);
-        consentRequestShown = false;
+        projectsWithConsentRequestShown.remove(project);
+        RunUtils.getInstance().asyncAnalyseProjectAndUpdatePanel(project);
       } ;
     });
   }

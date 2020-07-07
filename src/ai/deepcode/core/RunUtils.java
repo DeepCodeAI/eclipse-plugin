@@ -88,11 +88,6 @@ public final class RunUtils extends RunUtilsBase {
   }
 
   @Override
-  protected Object[] getOpenProjects() {
-    return ResourcesPlugin.getWorkspace().getRoot().getProjects();
-  }
-
-  @Override
   protected void updateAnalysisResultsUIPresentation(@NotNull Collection<Object> files) {
     for (Object file : files) {           
       for (SuggestionForFile suggestion : AnalysisData.getInstance().getAnalysis(file)) {
