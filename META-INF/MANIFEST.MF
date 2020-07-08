@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: DeepCode-Eclipse-plugin
 Bundle-SymbolicName: ai.deepcode;singleton:=true
 Bundle-Version: 0.0.5
-Bundle-Activator: eclipse_plugin.Activator
+Bundle-Activator: ai.deepcode.Activator
 Bundle-Vendor: deepcode.ai
 Require-Bundle: javax.inject,
  org.eclipse.osgi,

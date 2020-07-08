@@ -3,7 +3,7 @@ package ai.deepcode.handlers;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import ai.deepcode.core.AnalysisJob;
+import ai.deepcode.AnalysisJob;
 
 public class AnalysisHandler extends AbstractHandler {
 

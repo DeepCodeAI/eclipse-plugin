@@ -1,4 +1,4 @@
-package ai.deepcode.core;
+package ai.deepcode;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -7,6 +7,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import ai.deepcode.core.AnalysisData;
+import ai.deepcode.core.DCLogger;
+import ai.deepcode.core.LoginUtils;
+import ai.deepcode.core.RunUtils;
 
 public class AnalysisJob extends Job {
 
