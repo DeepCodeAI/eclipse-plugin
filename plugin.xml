@@ -40,6 +40,7 @@
          </command>
       </menuContribution>
 	</extension>
+	
     <extension
           id="deepcodemarker"
           name="DeepCode"
@@ -52,4 +53,8 @@
        </super>
     </extension>
 
+   <extension point="org.eclipse.ui.startup">
+     <startup class="ai.deepcode.parts.StartupClass"/>
+   </extension>
+   
 </plugin>
