@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.eclipse.core.filesystem.EFS;
@@ -14,13 +15,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.actions.NewExampleAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ai.deepcode.javaclient.core.PlatformDependentUtilsBase;
@@ -169,25 +168,39 @@ public class PDU extends PlatformDependentUtilsBase {
 
   @Override
   public void progressSetText(@Nullable Object progress, String text) {
-    if (progress instanceof IProgressMonitor) {
-      SubMonitor subMonitor = SubMonitor.convert((IProgressMonitor) progress);
+    if (progress instanceof SubMonitor) {
+      SubMonitor subMonitor = (SubMonitor) progress;
       subMonitor.setTaskName(text);
+    } else {
+      throw new IllegalArgumentException("progress should be SubMonitor instance");
     }
   }
 
   @Override
   public void progressCheckCanceled(@Nullable Object progress) {
-    if (progress instanceof IProgressMonitor) {
-      SubMonitor subMonitor = SubMonitor.convert((IProgressMonitor) progress);
+    if (progress instanceof SubMonitor) {
+      SubMonitor subMonitor = (SubMonitor) progress;
       subMonitor.checkCanceled();
+    } else {
+      throw new IllegalArgumentException("progress should be SubMonitor instance");
     }
   }
 
+  private static final Map<SubMonitor, Integer> mapMonitor2TicksUsed = new ConcurrentHashMap<>();
+  
   @Override
   public void progressSetFraction(@Nullable Object progress, double fraction) {
-    if (progress instanceof IProgressMonitor) {
-      SubMonitor subMonitor = SubMonitor.convert((IProgressMonitor) progress);
-      subMonitor.worked((int) (fraction * 100));;
+    if (progress instanceof SubMonitor) {
+      SubMonitor subMonitor = (SubMonitor) progress;
+      //subMonitor.setWorkRemaining(100);
+      int ticksUsed = mapMonitor2TicksUsed.getOrDefault(subMonitor, 0);
+      int newTicksUsed = (int) (fraction * 100 / 3); // will report 100% (1.00) in 3 phases
+      mapMonitor2TicksUsed.put(subMonitor, newTicksUsed);
+      if (newTicksUsed - ticksUsed >= 1) {
+        subMonitor.worked(1); 
+      }
+    } else {
+      throw new IllegalArgumentException("progress should be SubMonitor instance");
     }
   }
 

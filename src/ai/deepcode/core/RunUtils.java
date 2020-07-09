@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.jetbrains.annotations.NotNull;
 import ai.deepcode.javaclient.core.MyTextRange;
@@ -46,7 +47,7 @@ public final class RunUtils extends RunUtilsBase {
 
     @Override
     protected IStatus run(IProgressMonitor monitor) {
-      progressConsumer.accept(monitor);
+      progressConsumer.accept(SubMonitor.convert(monitor, 100));
       return Status.OK_STATUS;
     }
 
@@ -66,10 +67,10 @@ public final class RunUtils extends RunUtilsBase {
   }
 
   @NotNull
-  private static IProgressMonitor toProgress(@NotNull Object progress) {
-    if (!(progress instanceof IProgressMonitor))
-      throw new IllegalArgumentException("progress should be IProgressMonitor instance");
-    return (IProgressMonitor) progress;
+  private static SubMonitor toProgress(@NotNull Object progress) {
+    if (!(progress instanceof SubMonitor))
+      throw new IllegalArgumentException("progress should be SubMonitor instance");
+    return (SubMonitor) progress;
   }
 
   @Override
