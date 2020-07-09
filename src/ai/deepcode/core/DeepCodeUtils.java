@@ -55,8 +55,7 @@ public final class DeepCodeUtils extends DeepCodeUtilsBase {
 
   @Override
   protected boolean isGitIgnored(@NotNull Object file) {
-    // TODO Auto-generated method stub
-    return false;
+    return DeepCodeIgnoreInfoHolder.getInstance().isGitIgnoredFile(file);
   }
 
 

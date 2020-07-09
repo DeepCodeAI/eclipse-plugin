@@ -21,11 +21,6 @@ public final class DeepCodeIgnoreInfoHolder extends DeepCodeIgnoreInfoHolderBase
   }
 
   @Override
-  protected boolean inScope(@NotNull Object dcignoreFile, @NotNull Object fileToCheck) {
-    return getFilePath(fileToCheck).startsWith(getDirPath(dcignoreFile));
-  }
-
-  @Override
   protected String getFileName(@NotNull Object file) {
     return PDU.getInstance().getFileName(file);
   }
