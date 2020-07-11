@@ -23,6 +23,7 @@ import org.eclipse.ui.PlatformUI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ai.deepcode.javaclient.core.PlatformDependentUtilsBase;
+import ai.deepcode.utils.UIUtils;
 
 public class PDU extends PlatformDependentUtilsBase {
 
@@ -157,7 +158,7 @@ public class PDU extends PlatformDependentUtilsBase {
 
   @Override
   public void refreshPanel(@NotNull Object project) {
-    // TODO Auto-generated method stub
+    UIUtils.updateSummaryIcons();
   }
 
   // no direct call possible due to circular dependencies
@@ -187,17 +188,17 @@ public class PDU extends PlatformDependentUtilsBase {
   }
 
   private static final Map<SubMonitor, Integer> mapMonitor2TicksUsed = new ConcurrentHashMap<>();
-  
+
   @Override
   public void progressSetFraction(@Nullable Object progress, double fraction) {
     if (progress instanceof SubMonitor) {
       SubMonitor subMonitor = (SubMonitor) progress;
-      //subMonitor.setWorkRemaining(100);
+      // subMonitor.setWorkRemaining(100);
       int ticksUsed = mapMonitor2TicksUsed.getOrDefault(subMonitor, 0);
       int newTicksUsed = (int) (fraction * 100 / 3); // will report 100% (1.00) in 3 phases
       mapMonitor2TicksUsed.put(subMonitor, newTicksUsed);
       if (newTicksUsed - ticksUsed >= 1) {
-        subMonitor.worked(1); 
+        subMonitor.worked(1);
       }
     } else {
       throw new IllegalArgumentException("progress should be SubMonitor instance");
@@ -215,7 +216,7 @@ public class PDU extends PlatformDependentUtilsBase {
 
   private void runInUIThread(Consumer<Shell> consumer) {
     PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
-      Shell activeShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+      Shell activeShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(); // Display.getDefault().getActiveShell()
       consumer.accept(activeShell);
     });
   }

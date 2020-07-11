@@ -8,19 +8,31 @@
 			id="ai.deepcode">
 		</category>
 		<view
-			name="myProblemsView"
-            icon="icons/show.png"
-			category="ai.deepcode"
-			class="ai.deepcode.parts.MyProblemsView"
+			name="DeepCode Problems View"
+            icon="icons/logo.png"
+			categoryId="ai.deepcode"
+			class="org.eclipse.ui.internal.views.markers.MyProblemsView"
 			id="ai.deepcode.parts.myProblemsView">
 		</view>
 	</extension>
 	
 	<extension	point="org.eclipse.ui.commands">
+	  <category
+          description="DeepCode specific commands."
+          id="ai.deepcode"
+          name="DeepCode">
+      </category>
       <command
             id="ai.deepcode.analyse"
             defaultHandler="ai.deepcode.handlers.AnalysisHandler"
+			categoryId="ai.deepcode"
             name="Full analysis">
+      </command>
+      <command
+            id="ai.deepcode.showDCview"
+            defaultHandler="ai.deepcode.handlers.ShowDCViewHandler"
+			categoryId="ai.deepcode"
+            name="Show DeepCode view">
       </command>
 	</extension>
 	
@@ -32,12 +44,30 @@
                tooltip="Run full analysis">
          </command>
       </menuContribution>
+      
 	  <menuContribution locationURI="toolbar:org.eclipse.ui.views.ProblemView?after=additions">
          <command
                commandId="ai.deepcode.analyse"
                icon="icons/show.png"
                tooltip="Run full analysis">
          </command>
+         
+      </menuContribution>
+	  <menuContribution locationURI="toolbar:org.eclipse.ui.trim.status?after=org.eclipse.ui.StatusLine">
+         <toolbar id="ai.deepcode.toolbars.status" label="DeepCode status bar">
+            <command 
+            	commandId="ai.deepcode.showDCview"
+            	label="?"            	
+            	tooltip="DeepCode: Errors found"
+            	icon="icons/error.png"
+            	disabledIcon="icons/error_gray.png"
+            	mode="FORCE_TEXT"/>
+         
+       		<command
+            	commandId="ai.deepcode.analyse"
+               	tooltip="Run full analysis">
+         	</command>
+         </toolbar>
       </menuContribution>
 	</extension>
 	

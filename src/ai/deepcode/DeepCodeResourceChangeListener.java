@@ -23,12 +23,15 @@ import ai.deepcode.core.RunUtils;
 final class DeepCodeResourceChangeListener implements IResourceChangeListener {
 
   public void resourceChanged(IResourceChangeEvent event) {
-    if (event == null || event.getDelta() == null) {
+    if (event == null) {
       return;
     }
 
     if (event.getType() == IResourceChangeEvent.POST_CHANGE) {
 
+      if (event.getDelta() == null) {
+        return;
+      }
       IResourceDelta rootDelta = event.getDelta();
       final Set<IResource> filesChanged = new HashSet<>();
       final Set<IResource> ignoreFilesChanged = new HashSet<>();
@@ -74,6 +77,14 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
       ignoreFilesChanged.stream().map(PDU.getInstance()::getProject).distinct().forEach(project -> RunUtils
           .getInstance().rescanInBackgroundCancellableDelayed(project, PDU.DEFAULT_DELAY_SMALL, true));
 
+      // Project closing event
+    } else if (event.getType() == IResourceChangeEvent.PRE_CLOSE) { // TODO IResourceChangeEvent.PRE_DELETE
+      IResource rsrc = event.getResource();
+      if (rsrc instanceof IProject) {
+        RunUtils.getInstance().runInBackground(rsrc,
+            "Removing Project [" + PDU.getInstance().getProjectName(rsrc) + "] from cache...",
+            (progress) -> AnalysisData.getInstance().resetCachesAndTasks(rsrc));
+      }
     }
 
   }

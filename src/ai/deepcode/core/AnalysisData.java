@@ -1,6 +1,7 @@
 package ai.deepcode.core;
 
 import java.util.Collection;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.jetbrains.annotations.NotNull;
@@ -15,20 +16,19 @@ public final class AnalysisData extends AnalysisDataBase {
   }
 
   private AnalysisData() {
-    super(
-        PDU.getInstance(),
-        HashContentUtils.getInstance(),
-        DeepCodeParams.getInstance(),
-        DCLogger.getInstance());
+    super(PDU.getInstance(), HashContentUtils.getInstance(), DeepCodeParams.getInstance(), DCLogger.getInstance());
   }
 
   @Override
   protected void updateUIonFilesRemovalFromCache(@NotNull Collection<Object> files) {
     for (Object file : files) {
-      try {
-        PDU.toIFile(file).deleteMarkers("ai.deepcode.deepcodemarker", true, IResource.DEPTH_INFINITE);
-      } catch (CoreException e1) {
-        DCLogger.getInstance().logWarn(e1.getMessage());;
+      IFile iFile = PDU.toIFile(file);
+      if (iFile.isAccessible()) {
+        try {
+          iFile.deleteMarkers("ai.deepcode.deepcodemarker", true, IResource.DEPTH_INFINITE);
+        } catch (CoreException e1) {
+          DCLogger.getInstance().logWarn(e1.getMessage());;
+        }
       }
     }
   }

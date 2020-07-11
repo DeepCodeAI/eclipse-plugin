@@ -1,20 +1,23 @@
-package ai.deepcode.parts;
+package org.eclipse.ui.internal.views.markers;
 
 import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
-//import org.eclipse.ui.internal.views.markers.ProblemsView;
+import org.eclipse.ui.internal.views.markers.ProblemsView;
 import org.eclipse.ui.views.markers.MarkerSupportView;
 import org.eclipse.ui.views.markers.internal.MarkerMessages;
 import org.eclipse.ui.views.markers.internal.MarkerSupportRegistry;
 
 @SuppressWarnings("restriction")
-public class MyProblemsView extends MarkerSupportView {
-	public MyProblemsView() {
-		super(MarkerSupportRegistry.PROBLEMS_GENERATOR);
-	}
+public class MyProblemsView extends ProblemsView /*MarkerSupportView*/ {
+//	public MyProblemsView() {
+//		super(MarkerSupportRegistry.PROBLEMS_GENERATOR);
+//	}
 
+  @Override
+  void updateTitleImage(Integer[] counts) {}
+  
 	//@Override
 //	void updateTitleImage(Integer[] counts) {
 //		Image image= WorkbenchPlugin.getDefault().getSharedImages().getImage(IDEInternalWorkbenchImages.IMG_ETOOL_PROBLEMS_VIEW);
@@ -28,15 +31,15 @@ public class MyProblemsView extends MarkerSupportView {
 //		setTitleImage(image);
 //	}
 
-	@Override
-	protected IUndoContext getUndoContext() {
-		return WorkspaceUndoUtil.getProblemsUndoContext();
-	}
-
-	@Override
-	protected String getDeleteOperationName(IMarker[] markers) {
-		Assert.isLegal(markers.length > 0);
-		return markers.length == 1 ? MarkerMessages.deleteProblemMarker_operationName : MarkerMessages.deleteProblemMarkers_operationName;
-	}
+//	@Override
+//	protected IUndoContext getUndoContext() {
+//		return WorkspaceUndoUtil.getProblemsUndoContext();
+//	}
+//
+//	@Override
+//	protected String getDeleteOperationName(IMarker[] markers) {
+//		Assert.isLegal(markers.length > 0);
+//		return markers.length == 1 ? MarkerMessages.deleteProblemMarker_operationName : MarkerMessages.deleteProblemMarkers_operationName;
+//	}
 
 }
