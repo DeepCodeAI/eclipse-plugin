@@ -13,13 +13,13 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import ai.deepcode.core.DCLogger;
 import ai.deepcode.utils.UIUtils;
 
-public class ShowDCViewHandler extends AbstractHandler implements IElementUpdater {
+public class WarnIconClickedHandler extends AbstractHandler implements IElementUpdater {
 
-  private static final ImageDescriptor icon_error =
-      AbstractUIPlugin.imageDescriptorFromPlugin("ai.deepcode", "icons/error.png");
+  private static final ImageDescriptor icon_warn =
+      AbstractUIPlugin.imageDescriptorFromPlugin("ai.deepcode", "icons/warn.png");
 
-  private static final ImageDescriptor icon_error_gray =
-      AbstractUIPlugin.imageDescriptorFromPlugin("ai.deepcode", "icons/error_gray.png");
+  private static final ImageDescriptor icon_warn_gray =
+      AbstractUIPlugin.imageDescriptorFromPlugin("ai.deepcode", "icons/warn_gray.png");
   
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -33,12 +33,12 @@ public class ShowDCViewHandler extends AbstractHandler implements IElementUpdate
 
   @Override
   public void updateElement(UIElement element, Map parameters) {
-    if (UIUtils.getTotalErrors() == 0) {
-      element.setIcon(icon_error_gray);
+    if (UIUtils.getTotalWarnings() == 0) {
+      element.setIcon(icon_warn_gray);
       element.setText("0 ");
     } else {
-      element.setIcon(icon_error);
-      element.setText(UIUtils.getTotalErrors() + " ");
+      element.setIcon(icon_warn);
+      element.setText(UIUtils.getTotalWarnings() + " ");
     }
 
   }

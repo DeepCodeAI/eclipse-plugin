@@ -158,7 +158,7 @@ public class PDU extends PlatformDependentUtilsBase {
 
   @Override
   public void refreshPanel(@NotNull Object project) {
-    UIUtils.updateSummaryIcons();
+    UIUtils.updateEWISummary();
   }
 
   // no direct call possible due to circular dependencies

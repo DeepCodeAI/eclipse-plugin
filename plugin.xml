@@ -29,10 +29,22 @@
             name="Full analysis">
       </command>
       <command
-            id="ai.deepcode.showDCview"
-            defaultHandler="ai.deepcode.handlers.ShowDCViewHandler"
+            id="ai.deepcode.errorIconCommand"
+            defaultHandler="ai.deepcode.handlers.ErrorIconClickedHandler"
 			categoryId="ai.deepcode"
-            name="Show DeepCode view">
+            name="DeepCode: errorIconClicked">
+      </command>
+      <command
+            id="ai.deepcode.warnIconCommand"
+            defaultHandler="ai.deepcode.handlers.WarnIconClickedHandler"
+			categoryId="ai.deepcode"
+            name="DeepCode: warnIconClicked">
+      </command>
+      <command
+            id="ai.deepcode.infoIconCommand"
+            defaultHandler="ai.deepcode.handlers.InfoIconClickedHandler"
+			categoryId="ai.deepcode"
+            name="DeepCode: infoIconClicked">
       </command>
 	</extension>
 	
@@ -56,17 +68,23 @@
 	  <menuContribution locationURI="toolbar:org.eclipse.ui.trim.status?after=org.eclipse.ui.StatusLine">
          <toolbar id="ai.deepcode.toolbars.status" label="DeepCode status bar">
             <command 
-            	commandId="ai.deepcode.showDCview"
+            	commandId="ai.deepcode.errorIconCommand"
             	label="?"            	
             	tooltip="DeepCode: Errors found"
-            	icon="icons/error.png"
-            	disabledIcon="icons/error_gray.png"
+            	icon="icons/error_gray.png"
             	mode="FORCE_TEXT"/>
-         
-       		<command
-            	commandId="ai.deepcode.analyse"
-               	tooltip="Run full analysis">
-         	</command>
+            <command 
+            	commandId="ai.deepcode.warnIconCommand"
+            	label="?"            	
+            	tooltip="DeepCode: Warnings found"
+            	icon="icons/warn_gray.png"
+            	mode="FORCE_TEXT"/>
+            <command 
+            	commandId="ai.deepcode.infoIconCommand"
+            	label="?"            	
+            	tooltip="DeepCode: Infos found"
+            	icon="icons/info_gray.png"
+            	mode="FORCE_TEXT"/>         
          </toolbar>
       </menuContribution>
 	</extension>

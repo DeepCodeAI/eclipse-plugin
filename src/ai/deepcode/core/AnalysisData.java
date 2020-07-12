@@ -19,14 +19,15 @@ public final class AnalysisData extends AnalysisDataBase {
     super(PDU.getInstance(), HashContentUtils.getInstance(), DeepCodeParams.getInstance(), DCLogger.getInstance());
   }
 
+  // TODO fix markers not deleted if during one update call new update
   @Override
   protected void updateUIonFilesRemovalFromCache(@NotNull Collection<Object> files) {
     for (Object file : files) {
       IFile iFile = PDU.toIFile(file);
-      if (iFile.isAccessible()) {
-        try {
-          iFile.deleteMarkers("ai.deepcode.deepcodemarker", true, IResource.DEPTH_INFINITE);
-        } catch (CoreException e1) {
+      try {
+        iFile.deleteMarkers("ai.deepcode.deepcodemarker", true, IResource.DEPTH_INFINITE);
+      } catch (CoreException e1) {
+        if (iFile.isAccessible()) {
           DCLogger.getInstance().logWarn(e1.getMessage());;
         }
       }

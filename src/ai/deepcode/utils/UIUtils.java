@@ -1,5 +1,7 @@
 package ai.deepcode.utils;
 
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import ai.deepcode.core.AnalysisData;
 import ai.deepcode.core.DCLogger;
 import ai.deepcode.core.DeepCodeUtils;
@@ -9,12 +11,10 @@ public class UIUtils {
   private UIUtils() {}
 
   private static int totalErrors;
+  private static int totalWarns;
+  private static int totalInfos;
   
-  public static int getTotalErrors() {
-    return totalErrors;
-  }
-  
-  public static void updateSummaryIcons() {
+  public static void updateEWISummary() {
     int errors = 0;
     int warnings = 0;
     int infos = 0;
@@ -26,8 +26,27 @@ public class UIUtils {
       infos += ewi.getInfos();
     }
     totalErrors = errors;
+    totalWarns = warnings;
+    totalInfos = infos;
     DCLogger.getInstance().logInfo("error=" + errors + " warning=" + warnings + " info=" + infos);
     
+    // update labels and icons
+    ICommandService cs = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
+    cs.refreshElements("ai.deepcode.errorIconCommand", null);
+    cs.refreshElements("ai.deepcode.warnIconCommand", null);
+    cs.refreshElements("ai.deepcode.infoIconCommand", null);
   }
 
+  public static int getTotalErrors() {
+    return totalErrors;
+  }
+  
+  public static int getTotalWarnings() {
+    return totalWarns;
+  }
+
+  public static int getTotalInfos() {
+    return totalInfos;
+  }
+  
 }
