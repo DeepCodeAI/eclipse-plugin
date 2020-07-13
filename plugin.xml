@@ -29,6 +29,11 @@
             name="Full analysis">
       </command>
       <command
+            id="ai.deepcode.showWebCommandId"
+			categoryId="ai.deepcode"
+            name="Open Results in Browser">
+      </command>
+      <command
             id="ai.deepcode.errorIconCommand"
             defaultHandler="ai.deepcode.handlers.ErrorIconClickedHandler"
 			categoryId="ai.deepcode"
@@ -56,15 +61,15 @@
                tooltip="Run full analysis">
          </command>
       </menuContribution>
-      
-	  <menuContribution locationURI="toolbar:org.eclipse.ui.views.ProblemView?after=additions">
-         <command
-               commandId="ai.deepcode.analyse"
-               icon="icons/show.png"
-               tooltip="Run full analysis">
-         </command>
-         
+	  <menuContribution locationURI="menu:ai.deepcode.parts.myProblemsView?after=additions">
+         <menu
+               label="Open Results in Browser"
+               icon="icons/web.png"
+               tooltip="Open Results in Browser">
+               		<dynamic class="ai.deepcode.ShowWebResultsCompoundContributionItem"/>
+         </menu>
       </menuContribution>
+
 	  <menuContribution locationURI="toolbar:org.eclipse.ui.trim.status?after=org.eclipse.ui.StatusLine">
          <toolbar id="ai.deepcode.toolbars.status" label="DeepCode status bar">
             <command 

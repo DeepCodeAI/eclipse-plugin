@@ -15,9 +15,9 @@ public class Activator implements BundleActivator {
   public void start(BundleContext bundleContext) throws Exception {
     Activator.context = bundleContext;
 
+    // add listeners
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     IResourceChangeListener listener = new DeepCodeResourceChangeListener();
-    
     workspace.addResourceChangeListener(listener);
   }
 
