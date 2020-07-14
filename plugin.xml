@@ -30,8 +30,10 @@
       </command>
       <command
             id="ai.deepcode.showWebCommandId"
+            defaultHandler="ai.deepcode.handlers.ShowWebResultsHandler"
 			categoryId="ai.deepcode"
             name="Open Results in Browser">
+            	<commandParameter id="ai.deepcode.params.project" name="Project"/>
       </command>
       <command
             id="ai.deepcode.errorIconCommand"

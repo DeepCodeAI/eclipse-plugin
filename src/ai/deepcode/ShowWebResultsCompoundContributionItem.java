@@ -25,11 +25,11 @@ public class ShowWebResultsCompoundContributionItem extends CompoundContribution
       if (!project.isOpen())
         continue;
       Map<String, String> params = new HashMap<>();
-      params.put("project", project.getName());
+      params.put("ai.deepcode.params.project", project.getName());
       CommandContributionItemParameter commandContributionItemParameter =
           new CommandContributionItemParameter(myServiceLocator, "ai.deepcode.toolbar.showWebId",
               "ai.deepcode.showWebCommandId", CommandContributionItem.STYLE_PUSH);
-//      commandContributionItemParameter.parameters = params;
+      commandContributionItemParameter.parameters = params;
       commandContributionItemParameter.label = project.getName();
 
       result.add(new CommandContributionItem(commandContributionItemParameter));
