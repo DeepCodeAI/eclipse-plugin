@@ -11,7 +11,7 @@
 			name="DeepCode Problems View"
             icon="icons/logo.png"
 			categoryId="ai.deepcode"
-			class="org.eclipse.ui.internal.views.markers.MyProblemsView"
+			class="ai.deepcode.parts.MyProblemsView"
 			id="ai.deepcode.parts.myProblemsView">
 		</view>
 	</extension>
