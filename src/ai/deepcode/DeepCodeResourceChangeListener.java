@@ -27,6 +27,7 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
       return;
     }
 
+    // TODO delete file event
     if (event.getType() == IResourceChangeEvent.POST_CHANGE) {
 
       if (event.getDelta() == null) {
@@ -78,7 +79,7 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
           .getInstance().rescanInBackgroundCancellableDelayed(project, PDU.DEFAULT_DELAY_SMALL, true));
 
       // Project closing event
-    } else if (event.getType() == IResourceChangeEvent.PRE_CLOSE) { // TODO IResourceChangeEvent.PRE_DELETE
+    } else if (event.getType() == IResourceChangeEvent.PRE_CLOSE || event.getType() == IResourceChangeEvent.PRE_DELETE) {
       IResource rsrc = event.getResource();
       if (rsrc instanceof IProject) {
         RunUtils.getInstance().runInBackground(rsrc,
@@ -107,8 +108,8 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
         return true;
       IResource resource = delta.getResource();
 
-      // only interested in files
-      if (resource.getType() != IResource.FILE)
+      // only interested in files, valid(accessible) files.
+      if (resource.getType() != IResource.FILE && resource.isAccessible())
         return true;
 
       // Proceed supported files

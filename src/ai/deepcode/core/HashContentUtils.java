@@ -25,7 +25,9 @@ public class HashContentUtils extends HashContentUtilsBase {
       // System.out.println(Paths.get(file.getLocationURI()));
       return Files.readString(Paths.get(PDU.toIFile(file).getLocationURI()));
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      DCLogger.getInstance().logWarn("IOException while reading file: " + PDU.toIFile(file).getName() + "\n" + e);
+      return "";
+      //throw new RuntimeException(e);
     }
   }
 
