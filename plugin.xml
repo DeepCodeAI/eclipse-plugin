@@ -53,6 +53,10 @@
 			categoryId="ai.deepcode"
             name="DeepCode: infoIconClicked">
       </command>
+      <command
+            id="ai.deepcode.emptyCommand"
+			categoryId="ai.deepcode">
+      </command>
 	</extension>
 	
     <extension point="org.eclipse.ui.menus">
@@ -91,6 +95,10 @@
             	label="?"            	
             	tooltip="DeepCode: Infos found"
             	icon="icons/info_gray.png"
+            	mode="FORCE_TEXT"/>         
+            <command 
+            	commandId="ai.deepcode.emptyCommand"
+            	label="_"            	
             	mode="FORCE_TEXT"/>         
          </toolbar>
       </menuContribution>
