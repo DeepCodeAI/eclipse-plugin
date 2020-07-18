@@ -116,6 +116,12 @@
        </super>
     </extension>
 
+   <extension point="org.eclipse.ui.ide.markerResolution">
+      <markerResolutionGenerator
+         markerType="ai.deepcode.deepcodemarker"
+         class="ai.deepcode.quickfix.IgnoreSugestion"/>
+   </extension>
+
    <extension point="org.eclipse.ui.startup">
      <startup class="ai.deepcode.parts.StartupClass"/>
    </extension>
