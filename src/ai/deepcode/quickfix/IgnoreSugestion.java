@@ -1,18 +1,13 @@
 package ai.deepcode.quickfix;
 
-import java.util.Map;
 import java.util.regex.Pattern;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 import org.eclipse.ui.IWorkbench;
@@ -20,7 +15,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.ide.IDE;
 import org.jetbrains.annotations.NotNull;
 import ai.deepcode.core.DCLogger;
 import ai.deepcode.core.HashContentUtils;
@@ -70,6 +65,8 @@ class QuickFix implements IMarkerResolution {
         insertPosition -= 1;
       }
     }
+    final int finalInsertPosition = insertPosition;
+    final String finalPostfix = postfix; 
 
     final String[] splitedId = fullSuggestionId.split("%2F");
     final String suggestionId = splitedId[splitedId.length - 1];
@@ -78,53 +75,54 @@ class QuickFix implements IMarkerResolution {
         + "deepcode ignore " + suggestionId + ": ";
     final String ignoreDescription = "<please specify a reason of ignoring this>";
 
-     IWorkbench iworkbench = PlatformUI.getWorkbench();
-     if (iworkbench == null) {
-       DCLogger.getInstance().logWarn("IWorkbench is NULL");
-       return;
-     }
-     IWorkbenchWindow iworkbenchwindow = iworkbench.getActiveWorkbenchWindow();
-     if (iworkbenchwindow == null){
-       DCLogger.getInstance().logWarn("IWorkbenchWindow is NULL");
-       return;
-     }
-     IWorkbenchPage page = iworkbenchwindow.getActivePage();
-     if (page == null) {
-       DCLogger.getInstance().logWarn("IWorkbenchPage is NULL");
-       return;
-     }
-    IEditorPart editorPart = page.getActiveEditor();
-    if (editorPart == null
-        // check if file already opened in active editor
-        || !((IFileEditorInput) editorPart.getEditorInput()).getFile().equals(file)) {
-      // open file in the editor for modification
-      IEditorDescriptor desc = iworkbench.getEditorRegistry().getDefaultEditor(file.getName());
-      try {
-        editorPart = page.openEditor(new FileEditorInput(file), desc.getId());
-      } catch (PartInitException e) {
-        DCLogger.getInstance().logWarn(e.getMessage() + e.getStackTrace());;
-      }
-    }
-    ITextEditor editor = (ITextEditor) editorPart.getAdapter(ITextEditor.class);
-    if (editor == null) {
-      DCLogger.getInstance().logWarn("ITextEditor is NULL");
+    IWorkbench iworkbench = PlatformUI.getWorkbench();
+    if (iworkbench == null) {
+      DCLogger.getInstance().logWarn("IWorkbench is NULL");
       return;
     }
-    IDocumentProvider provider = editor.getDocumentProvider();
-    IDocument document = provider.getDocument(editor.getEditorInput());
-    try {
-      document.replace(insertPosition, 0, ignoreCommand + ignoreDescription + postfix);
-    } catch (BadLocationException e) {
-      DCLogger.getInstance().logWarn(e.getMessage() + e.getStackTrace());;
-    }
 
-    // int caretOffset = insertPosition + ignoreCommand.length();
-    // editor.getCaretModel().moveToOffset(caretOffset);
-    //
-    // editor.getSelectionModel().setSelection(caretOffset, caretOffset + ignoreDescription.length());
-    //
-    // // set focus on editor if called from DeepCode Panel
-    // IdeFocusManager.getInstance(project).requestFocus(editor.getContentComponent(), true);
+    // Run in UI thread
+    iworkbench.getDisplay().asyncExec(() -> {
+      IWorkbenchWindow iworkbenchwindow = iworkbench.getActiveWorkbenchWindow();
+      if (iworkbenchwindow == null) {
+        DCLogger.getInstance().logWarn("IWorkbenchWindow is NULL");
+        return;
+      }
+      IWorkbenchPage page = iworkbenchwindow.getActivePage();
+      if (page == null) {
+        DCLogger.getInstance().logWarn("IWorkbenchPage is NULL");
+        return;
+      }
+
+      IEditorPart editorPart = null;
+      try {
+        editorPart = IDE.openEditor(page, file, true);
+      } catch (PartInitException e) {
+        DCLogger.getInstance().logWarn(e.getMessage() + e.getStackTrace());
+      }
+      if (editorPart == null) {
+        DCLogger.getInstance().logWarn("IEditorPart is NULL");
+        return;
+      }
+      ITextEditor editor = (ITextEditor) editorPart.getAdapter(ITextEditor.class);
+      if (editor == null) {
+        DCLogger.getInstance().logWarn("ITextEditor is NULL");
+        return;
+      }
+
+      // actually change the source file
+      IDocumentProvider provider = editor.getDocumentProvider();
+      IDocument document = provider.getDocument(editor.getEditorInput());
+      try {
+        document.replace(finalInsertPosition, 0, ignoreCommand + ignoreDescription + finalPostfix);
+      } catch (BadLocationException e) {
+        DCLogger.getInstance().logWarn(e.getMessage() + e.getStackTrace());;
+      }
+
+      // select description
+      int caretOffset = finalInsertPosition + ignoreCommand.length();
+      editor.selectAndReveal(caretOffset, ignoreDescription.length());
+    });
   }
 
   @NotNull

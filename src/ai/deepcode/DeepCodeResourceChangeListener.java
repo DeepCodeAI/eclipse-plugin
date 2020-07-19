@@ -45,14 +45,15 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
         DCLogger.getInstance().logWarn(e.getMessage());
       }
 
+      // TODO optimize
       // Reanalyze files affected
-      if (filesChanged.size() >= 10) {
+      if (filesChanged.size() > 1) {
         // Easier to do full rescan
         filesChanged.stream().map(f -> PDU.getInstance().getProject(f)).distinct()
             .forEach(project -> RunUtils.getInstance().asyncAnalyseProjectAndUpdatePanel(project));
       } else
         for (IResource file : filesChanged) {
-          RunUtils.getInstance().runInBackgroundCancellable(file, "Analyzing files changed...", (progress) -> {
+          RunUtils.getInstance().runInBackgroundCancellable(file, "Analyzing file changed: " + file.getProjectRelativePath(), (progress) -> {
             if (AnalysisData.getInstance().isFileInCache(file)) {
               AnalysisData.getInstance().removeFilesFromCache(Collections.singleton(file));
             }
