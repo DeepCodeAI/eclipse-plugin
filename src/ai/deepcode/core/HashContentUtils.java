@@ -1,6 +1,7 @@
 package ai.deepcode.core;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +24,9 @@ public class HashContentUtils extends HashContentUtilsBase {
   public @NotNull String doGetFileContent(@NotNull Object file) {
     try {
       // System.out.println(Paths.get(file.getLocationURI()));
-      return Files.readString(Paths.get(PDU.toIFile(file).getLocationURI()));
+      byte[] encoded = Files.readAllBytes(Paths.get(PDU.toIFile(file).getLocationURI()));
+      return new String(encoded, StandardCharsets.UTF_8);
+      // return Files.readString(Paths.get(PDU.toIFile(file).getLocationURI()));
     } catch (IOException e) {
       DCLogger.getInstance().logWarn("IOException while reading file: " + PDU.toIFile(file).getName() + "\n" + e);
       return "";

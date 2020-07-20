@@ -1,5 +1,6 @@
 package ai.deepcode.quickfix;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -49,32 +50,7 @@ class QuickFix implements IMarkerResolution {
     final String fullSuggestionId = marker.getAttribute("fullSuggestionId", "");
     final int lineNumber = marker.getAttribute(IMarker.LINE_NUMBER, -1) - 1;
     final IFile file = PDU.toIFile(marker.getResource());
-    int insertPosition = PDU.getInstance().getLineStartOffset(file, lineNumber);
-
-    final String lineText = getLineText(file, lineNumber);
-
-    String prefix = getLeadingSpaces(lineText) + getLineCommentPrefix(file);
-    String postfix = "\n";
-
-    if (lineNumber > 0) {
-      String prevLine = getLineText(file, lineNumber - 1);
-      final Pattern ignorePattern = Pattern.compile(".*" + getLineCommentPrefix(file) + ".*deepcode\\s?ignore.*");
-      if (ignorePattern.matcher(prevLine).matches()) {
-        prefix = ",";
-        postfix = "";
-        insertPosition -= 1;
-      }
-    }
-    final int finalInsertPosition = insertPosition;
-    final String finalPostfix = postfix; 
-
-    final String[] splitedId = fullSuggestionId.split("%2F");
-    final String suggestionId = splitedId[splitedId.length - 1];
-
-    final String ignoreCommand = prefix + (prefix.endsWith(" ") ? "" : " ") + (isFileIntention ? "file " : "")
-        + "deepcode ignore " + suggestionId + ": ";
-    final String ignoreDescription = "<please specify a reason of ignoring this>";
-
+    
     IWorkbench iworkbench = PlatformUI.getWorkbench();
     if (iworkbench == null) {
       DCLogger.getInstance().logWarn("IWorkbench is NULL");
@@ -110,25 +86,60 @@ class QuickFix implements IMarkerResolution {
         return;
       }
 
-      // actually change the source file
       IDocumentProvider provider = editor.getDocumentProvider();
       IDocument document = provider.getDocument(editor.getEditorInput());
+
+      // actually change the source file
+      int insertPosition;
+      String lineText;
+      String prevLine = null;
       try {
-        document.replace(finalInsertPosition, 0, ignoreCommand + ignoreDescription + finalPostfix);
+        insertPosition = document.getLineOffset(lineNumber);  //PDU.getInstance().getLineStartOffset(file, lineNumber);
+        lineText = getLineText(document, lineNumber);
+        if (lineNumber > 0) {
+          prevLine = getLineText(document, lineNumber - 1);
+        }
+      } catch (BadLocationException e) {
+        DCLogger.getInstance().logWarn(e.getMessage() + e.getStackTrace());
+        return;
+      }
+      
+      String prefix = getLeadingSpaces(lineText) + getLineCommentPrefix(file);
+      String postfix = "\r";
+      
+      if (lineNumber > 0) {
+        final Pattern ignorePattern = Pattern.compile(".*" + getLineCommentPrefix(file) + ".*deepcode\\s?ignore.*(\r\n?)");
+        if (ignorePattern.matcher(prevLine).matches()) {
+          prefix = ",";
+          postfix = "";
+          insertPosition -= 1;
+        }
+      }
+      
+      final String[] splitedId = fullSuggestionId.split("%2F");
+      final String suggestionId = splitedId[splitedId.length - 1];
+      
+      final String ignoreCommand = prefix + (prefix.endsWith(" ") ? "" : " ") + (isFileIntention ? "file " : "")
+          + "deepcode ignore " + suggestionId + ": ";
+      final String ignoreDescription = "<please specify a reason of ignoring this>";
+      
+      try {
+        document.replace(insertPosition, 0, ignoreCommand + ignoreDescription + postfix);
       } catch (BadLocationException e) {
         DCLogger.getInstance().logWarn(e.getMessage() + e.getStackTrace());;
       }
 
       // select description
-      int caretOffset = finalInsertPosition + ignoreCommand.length();
+      int caretOffset = insertPosition + ignoreCommand.length();
       editor.selectAndReveal(caretOffset, ignoreDescription.length());
     });
   }
 
   @NotNull
-  private static String getLineText(@NotNull Object file, int line) {
-    String fileContent = HashContentUtils.getInstance().getFileContent(file);
-    return fileContent.lines().skip(line).findFirst().orElseThrow();
+  private static String getLineText(@NotNull IDocument document, int lineNumber) throws BadLocationException {
+    return document.get(document.getLineOffset(lineNumber), document.getLineLength(lineNumber));
+//    String fileContent = HashContentUtils.getInstance().getFileContent(file);
+//    return Arrays.stream(fileContent.split("\r")).skip(lineNumber).findFirst().orElse("");
   }
 
   private static final String DEFAULT_LINE_COMMENT_PREFIX = "//";

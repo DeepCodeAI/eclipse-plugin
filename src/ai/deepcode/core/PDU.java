@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -99,14 +100,18 @@ public class PDU extends PlatformDependentUtilsBase {
   }
 
   @Override
-  public int getLineStartOffset(@NotNull Object file, int line) {
+  public int getLineStartOffset(@NotNull Object file, int lineNumber) {
     String fileContent = HashContentUtils.getInstance().getFileContent(file);
     int offset = 0;
-    for (String nextLine : fileContent.lines().limit(line).collect(Collectors.toList())) {
+    final List<String> lines = Arrays.stream(fileContent.split("\r")).limit(lineNumber).collect(Collectors.toList());
+    for (String line : lines) {
       // TODO: for strings with special symbols (2,3, etc bytes per char) will be inaccurate.
       // we might need to read file content in charset eclipse shows files (performance inefficient?)
-      offset += nextLine.length();
-      offset = addLineSeparatorOffset(fileContent, offset);
+      offset += line.length() + 1; // add length of `\r` symbol
+      // offset = addLineSeparatorOffset(fileContent, offset);
+    }
+    if (offset < fileContent.length() - 1 && fileContent.charAt(offset) == '\n') {
+      offset++; // add length of `\n` symbol
     }
     return offset;
     // final String lineText = fileContent.lines().skip(line).findFirst().orElseThrow();

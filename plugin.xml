@@ -55,7 +55,8 @@
       </command>
       <command
             id="ai.deepcode.emptyCommand"
-			categoryId="ai.deepcode">
+			categoryId="ai.deepcode"
+			name = "DeepCode: empty command">
       </command>
 	</extension>
 	
@@ -72,7 +73,7 @@
                label="Open Results in Browser"
                icon="icons/web.png"
                tooltip="Open Results in Browser">
-               		<dynamic class="ai.deepcode.ShowWebResultsCompoundContributionItem"/>
+               		<dynamic class="ai.deepcode.ShowWebResultsCompoundContributionItem" id ="ai.deepcode.ShowWebResults"/>
          </menu>
       </menuContribution>
 
@@ -99,6 +100,7 @@
             <command 
             	commandId="ai.deepcode.emptyCommand"
             	label="_"            	
+            	tooltip=" "
             	mode="FORCE_TEXT"/>         
          </toolbar>
       </menuContribution>
