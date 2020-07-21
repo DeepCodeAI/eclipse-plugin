@@ -4,7 +4,7 @@
 
 	<extension point="org.eclipse.ui.views">
 		<category
-			name="myProblemsView"
+			name="DeepCode"
 			id="ai.deepcode">
 		</category>
 		<view
@@ -128,4 +128,17 @@
      <startup class="ai.deepcode.parts.StartupClass"/>
    </extension>
    
+   <extension point="org.eclipse.ui.preferencePages">
+      <page
+            class="ai.deepcode.parts.DeepCodePrefPage"
+            id="ai.deepcode.preferences"
+            name="DeepCode Preferences">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="ai.deepcode.parts.DeepCodePreferenceInitializer">
+      </initializer>
+   </extension>
 </plugin>
