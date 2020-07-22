@@ -36,9 +36,11 @@ public class InfoIconClickedHandler extends AbstractHandler implements IElementU
     if (UIUtils.getTotalInfos() == 0) {
       element.setIcon(icon_info_gray);
       element.setText("0 ");
+      element.setTooltip("DeepCode: No Informational suggestions");
     } else {
       element.setIcon(icon_info);
       element.setText(UIUtils.getTotalInfos() + " ");
+      element.setTooltip("DeepCode: " + UIUtils.getTotalErrors() + " Informational suggestions");
     }
 
   }

@@ -20,7 +20,7 @@ public class ErrorIconClickedHandler extends AbstractHandler implements IElement
 
   private static final ImageDescriptor icon_error_gray =
       AbstractUIPlugin.imageDescriptorFromPlugin("ai.deepcode", "icons/error_gray.png");
-  
+
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     try {
@@ -36,9 +36,11 @@ public class ErrorIconClickedHandler extends AbstractHandler implements IElement
     if (UIUtils.getTotalErrors() == 0) {
       element.setIcon(icon_error_gray);
       element.setText("0 ");
+      element.setTooltip("DeepCode: No Error level suggestions");
     } else {
       element.setIcon(icon_error);
       element.setText(UIUtils.getTotalErrors() + " ");
+      element.setTooltip("DeepCode: " + UIUtils.getTotalErrors() + " Error level suggestions");
     }
 
   }

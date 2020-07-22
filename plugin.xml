@@ -29,6 +29,12 @@
             name="Full analysis">
       </command>
       <command
+            id="ai.deepcode.show_settings"
+            defaultHandler="ai.deepcode.handlers.ShowSettingsHandler"
+			categoryId="ai.deepcode"
+            name="Show DeepCode Preferences">
+      </command>
+      <command
             id="ai.deepcode.showWebCommandId"
             defaultHandler="ai.deepcode.handlers.ShowWebResultsHandler"
 			categoryId="ai.deepcode"
@@ -66,6 +72,11 @@
                commandId="ai.deepcode.analyse"
                icon="icons/show.png"
                tooltip="Run full analysis">
+         </command>
+         <command
+               commandId="ai.deepcode.show_settings"
+               icon="icons/settings.png"
+               tooltip="Show DeepCode Preferences">
          </command>
       </menuContribution>
 	  <menuContribution locationURI="menu:ai.deepcode.parts.myProblemsView?after=additions">

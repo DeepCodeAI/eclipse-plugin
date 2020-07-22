@@ -10,9 +10,9 @@ public class UIUtils {
   
   private UIUtils() {}
 
-  private static int totalErrors;
-  private static int totalWarns;
-  private static int totalInfos;
+  private static int totalErrors = 0;
+  private static int totalWarns = 0;
+  private static int totalInfos = 0;
   
   public static void updateEWISummary() {
     int errors = 0;

@@ -36,9 +36,11 @@ public class WarnIconClickedHandler extends AbstractHandler implements IElementU
     if (UIUtils.getTotalWarnings() == 0) {
       element.setIcon(icon_warn_gray);
       element.setText("0 ");
+      element.setTooltip("DeepCode: No Warning level suggestions");
     } else {
       element.setIcon(icon_warn);
       element.setText(UIUtils.getTotalWarnings() + " ");
+      element.setTooltip("DeepCode: " + UIUtils.getTotalErrors() + " Warning level suggestions");
     }
 
   }
