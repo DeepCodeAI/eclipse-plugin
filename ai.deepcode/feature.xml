@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="ai.deepcode"
-      label="DeepCode plugin"
+      id="ai.deepcode.feature"
+      label="DeepCode feature"
       version="1.0.5.dev"
       provider-name="deepcode.ai">
 
