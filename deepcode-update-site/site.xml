@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/ai.deepcode.feature_1.0.5.dev.jar" id="ai.deepcode.feature" version="1.0.5.dev"/>
+   <feature url="features/ai.deepcode.feature_1.0.6.dev.jar" id="ai.deepcode.feature" version="1.0.6.dev"/>
 </site>
