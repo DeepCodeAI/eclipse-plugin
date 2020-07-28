@@ -1,8 +1,9 @@
 ### Project structure
-There are 3 depended projects here:
+There are 4 depended projects here:
 1. `eclipse-plugin` - actual source code for the plugin;
 2. `deepcode-feature` - description and legal information about plugin, as well as some Eclipse required service wrappers;
-3. `deepcode-update-site` - "update-site" to be given for Eclipse: Preferences - Install/Update - Available Software Sites
+3. `deepcode-update-site` - "update-site" to be given for Eclipse: Preferences - Install/Update - Available Software Sites;
+4. `plugin-test-fragment` - tests for plugin.
 
 Read more about Eclipse plugin concepts at official Eclipse [Plug-in Development Environment Guide](https://help.eclipse.org/2020-06/index.jsp?nav=%2F4_1) or in quick overview [Custom eclipse plugin | Build, create & publish to update site & marketplace](https://itsallbinary.com/custom-eclipse-plugin-build-create-publish-to-update-site-marketplace-good-for-beginners/) or the most recent [Eclipse IDE Plug-in Development: Plug-ins, Features, Update Sites and IDE Extensions](https://www.vogella.com/tutorials/EclipsePlugin/article.html)
 
@@ -19,19 +20,26 @@ See below correspondent `java-client` version requirements:
 |------------------|-------------|
 | 0.0.9            | 2.0.10      |
 
-- Now you should be able to:
+- Modify `.classpath` file inside `plugin-test-fragment` project to provide path to `java-client-{X.X.X}-all.jar` location;
+
+Now you should be able to:
   * [modify and run plugin](https://www.vogella.com/tutorials/EclipsePlugin/article.html#runtimeeclipse_starting) itself at `eclipse-plugin` project; 
   * update needed texts and version number at `deepcode-feature` project; 
-  * Build it all into update-site in `deepcode-update-site` project.
+  * Build it all into update-site in `deepcode-update-site` project;
+  * For running tests use `plugin-test-fragment` project and in Package Explorer select the `Run As > JUnit Plug-in Test` command.
 
 ### Manual plugin Install
 Production ready plugin should be available in Eclipse Marketplace (Help - Eclipse Marketplace...).
 
-If you would like to add update-site manually (or add local version of update-site) then use this [tutorial](https://marketplace.eclipse.org/content/eclipse-java-development-tools-0/help)
+If you would like to add update-site manually (or add local version of update-site) then use this [tutorial](https://marketplace.eclipse.org/content/eclipse-java-development-tools-0/help) and add your local copy of update-site project or recent GitHub stored dev version of it: `https://raw.githubusercontent.com/DeepCodeAI/eclipse-plugin/dev/deepcode-update-site`
 
 If you need to test modified plugin during development process - use `Run As - Eclipse Application` at your Eclipse IDE for Eclipse Committers (see [here](https://www.vogella.com/tutorials/EclipsePlugin/article.html#runtimeeclipse_starting)).
 
 If you need to test pure plugin *.jar on another Eclipse IDE instance without updating feature and update-site you can use this trick [FAQ How do I install new plug-ins?](https://wiki.eclipse.org/FAQ_How_do_I_install_new_plug-ins%3F)
+
+### JAR Signing
+
+ToDo [JAR Signing](https://wiki.eclipse.org/JAR_Signing)
 
 ### Useful links
 

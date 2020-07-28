@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Plugin-test-fragment
+Bundle-SymbolicName: plugin-test-fragment
+Bundle-Version: 1.0.0
+Bundle-Vendor: deepcode.ai
+Fragment-Host: ai.deepcode;bundle-version="0.0.9"
+Automatic-Module-Name: plugin.test.fragment
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.junit;bundle-version="4.13.0"
