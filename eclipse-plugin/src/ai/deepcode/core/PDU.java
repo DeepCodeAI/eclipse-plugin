@@ -228,12 +228,18 @@ public class PDU extends PlatformDependentUtilsBase {
 
   private static final String title = "Deepcode: ";
 
+  private static boolean isNewLoginRequestShown = false;
+
   @Override
   public void showLoginLink(Object project, String message) {
+    if (isNewLoginRequestShown)
+      return;
+    isNewLoginRequestShown = true;
     runInUIThread((shell) -> {
       if (MessageDialog.openConfirm(shell, title + "Login", message)) {
         LoginUtils.getInstance().requestNewLogin(project, true);
       } ;
+      isNewLoginRequestShown = false;
     });
   }
 

@@ -39,7 +39,7 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
 
       try {
         rootDelta.accept(new FileChangedOrCreatedVisitor(filesChanged, ignoreFilesChanged));
-        rootDelta.accept(new ProjectOpenedVisitor());
+        rootDelta.accept(new ProjectOpenedOrCreatedVisitor());
 
       } catch (CoreException e) {
         DCLogger.getInstance().logWarn(e.getMessage());
@@ -53,13 +53,14 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
             .forEach(project -> RunUtils.getInstance().asyncAnalyseProjectAndUpdatePanel(project));
       } else
         for (IResource file : filesChanged) {
-          RunUtils.getInstance().runInBackgroundCancellable(file, "Analyzing file changed: " + file.getProjectRelativePath(), (progress) -> {
-            if (AnalysisData.getInstance().isFileInCache(file)) {
-              AnalysisData.getInstance().removeFilesFromCache(Collections.singleton(file));
-            }
-            Object project = PDU.getInstance().getProject(file);
-            RunUtils.getInstance().updateCachedAnalysisResults(project, Collections.singleton(file), progress);
-          });
+          RunUtils.getInstance().runInBackgroundCancellable(file,
+              "Analyzing file changed: " + file.getProjectRelativePath(), (progress) -> {
+                if (AnalysisData.getInstance().isFileInCache(file)) {
+                  AnalysisData.getInstance().removeFilesFromCache(Collections.singleton(file));
+                }
+                Object project = PDU.getInstance().getProject(file);
+                RunUtils.getInstance().updateCachedAnalysisResults(project, Collections.singleton(file), progress);
+              });
         }
 
       // Rescan .dcignore and .gitignore files changed
@@ -80,7 +81,8 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
           .getInstance().rescanInBackgroundCancellableDelayed(project, PDU.DEFAULT_DELAY_SMALL, true));
 
       // Project closing event
-    } else if (event.getType() == IResourceChangeEvent.PRE_CLOSE || event.getType() == IResourceChangeEvent.PRE_DELETE) {
+    } else if (event.getType() == IResourceChangeEvent.PRE_CLOSE
+        || event.getType() == IResourceChangeEvent.PRE_DELETE) {
       IResource rsrc = event.getResource();
       if (rsrc instanceof IProject) {
         RunUtils.getInstance().runInBackground(rsrc,
@@ -101,14 +103,15 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
     }
 
     public boolean visit(IResourceDelta delta) {
-      // only interested in changed or added resources (not removed)
-      if (!(delta.getKind() == IResourceDelta.CHANGED || delta.getKind() == IResourceDelta.ADDED))
-        return true;
-      // only interested in content changes
-      if ((delta.getFlags() & IResourceDelta.CONTENT) == 0)
-        return true;
-      IResource resource = delta.getResource();
+      final boolean isResorceContentChanged = 
+          delta.getKind() == IResourceDelta.CHANGED // changed resource
+          && ((delta.getFlags() & IResourceDelta.CONTENT) != 0); // content changes
+      final boolean isResourceAdded = delta.getKind() == IResourceDelta.ADDED;
 
+      if (!(isResorceContentChanged || isResourceAdded))
+        return true;
+
+      IResource resource = delta.getResource();
       // only interested in files, valid(accessible) files.
       if (resource.getType() != IResource.FILE && resource.isAccessible())
         return true;
@@ -127,23 +130,26 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
     }
   }
 
-  private final class ProjectOpenedVisitor implements IResourceDeltaVisitor {
+  private final class ProjectOpenedOrCreatedVisitor implements IResourceDeltaVisitor {
     public boolean visit(final IResourceDelta delta) throws CoreException {
       IResource resource = delta.getResource();
-      if (((resource.getType() & IResource.PROJECT) != 0) && resource.getProject().isOpen()
-          && delta.getKind() == IResourceDelta.CHANGED && ((delta.getFlags() & IResourceDelta.OPEN) != 0)) {
-
+      final boolean isProjectDelta = ((resource.getType() & IResource.PROJECT) != 0) && resource.getProject().isOpen();
+      final boolean isProjectOpenedEvent =
+          delta.getKind() == IResourceDelta.CHANGED && (delta.getFlags() & IResourceDelta.OPEN) != 0;
+      final boolean isProjectCreatedEvent = delta.getKind() == IResourceDelta.ADDED;
+      
+      if (isProjectDelta && (isProjectOpenedEvent || isProjectCreatedEvent)) {
         IProject project = (IProject) resource;
-        projectOpened(project);
+        analyseProject(project);
         return false;
       }
       return true;
     }
 
-    private void projectOpened(@Nullable IProject project) {
+    private void analyseProject(@Nullable IProject project) {
       AnalysisData.getInstance().resetCachesAndTasks(project);
-      // Initial silent logging check before analysis.
-      if (LoginUtils.getInstance().isLogged(project, false)) {
+      // Initial (silent needed???) logging check before analysis.
+      if (LoginUtils.getInstance().isLogged(project, true)) {
         RunUtils.getInstance().asyncAnalyseProjectAndUpdatePanel(project);
       }
     }
