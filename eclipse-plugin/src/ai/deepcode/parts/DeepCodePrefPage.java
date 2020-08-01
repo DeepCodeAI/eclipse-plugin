@@ -56,19 +56,26 @@ public class DeepCodePrefPage extends FieldEditorPreferencePage implements IWork
       final String property = event.getProperty();
       final String value = event.getNewValue().toString();
 
+      boolean rescanNeeded = false;
       if (property.equals(BASE_URL)) {
         DeepCodeParams.getInstance().setApiUrl(value);
+        rescanNeeded = true;
       } else if (property.equals(TOKEN_ID)) {
         DeepCodeParams.getInstance().setSessionToken(value);
+        rescanNeeded = true;
       } else if (property.equals(MIN_SEVERETY_LEVEL)) {
         int severity = value.equals("infos") ? 1 : value.equals("warns") ? 2 : value.equals("errors") ? 3 : 1;
         DeepCodeParams.getInstance().setMinSeverity(severity);
+        rescanNeeded = true;
       } else if (property.equals(ADD_LINTERS)) {
         DeepCodeParams.getInstance().setUseLinter((Boolean) event.getNewValue());
+        rescanNeeded = true;
       }
-      AnalysisData.getInstance().resetCachesAndTasks(null);
-      if (LoginUtils.getInstance().isLogged(null, true)) {
-        RunUtils.getInstance().asyncAnalyseProjectAndUpdatePanel(null);
+      if (rescanNeeded) {
+        AnalysisData.getInstance().resetCachesAndTasks(null);
+        if (LoginUtils.getInstance().isLogged(null, true)) {
+          RunUtils.getInstance().asyncAnalyseProjectAndUpdatePanel(null);
+        }
       }
     });
   }

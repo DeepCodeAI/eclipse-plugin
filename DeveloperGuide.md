@@ -19,6 +19,7 @@ See below correspondent `java-client` version requirements:
 | eclipse-plugin   | java-client |
 |------------------|-------------|
 | 0.0.9            | 2.0.10      |
+| 0.0.10           | 2.0.11      |
 
 - Modify `.classpath` file inside `plugin-test-fragment` project to provide path to `java-client-{X.X.X}-all.jar` location;
 
