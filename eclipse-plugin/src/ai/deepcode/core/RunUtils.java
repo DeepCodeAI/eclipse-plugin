@@ -102,7 +102,7 @@ public final class RunUtils extends RunUtilsBase {
             String prefix = "(" + range.getStartRow() + ":" + (range.getStartCol() + 1) + ")" + " DeepCode: ";
             m.setAttribute(IMarker.MESSAGE, prefix + suggestion.getMessage());
             m.setAttribute(IMarker.SEVERITY, suggestion.getSeverity() - 1);
-            m.setAttribute("fullSuggestionId", suggestion.getId());
+            m.setAttribute("rule", suggestion.getRule());
           } catch (CoreException e) {
             dcLogger.logWarn(e.getMessage());;
           }

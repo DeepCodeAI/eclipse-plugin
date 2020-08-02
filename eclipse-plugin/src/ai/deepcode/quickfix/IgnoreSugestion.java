@@ -47,10 +47,11 @@ class QuickFix implements IMarkerResolution {
 
   @Override
   public void run(IMarker marker) {
-    final String fullSuggestionId = marker.getAttribute("fullSuggestionId", "");
+    // final String fullSuggestionId = marker.getAttribute("fullSuggestionId", "");
+    final String rule = marker.getAttribute("rule", "");
     final int lineNumber = marker.getAttribute(IMarker.LINE_NUMBER, -1) - 1;
     final IFile file = PDU.toIFile(marker.getResource());
-    
+
     IWorkbench iworkbench = PlatformUI.getWorkbench();
     if (iworkbench == null) {
       DCLogger.getInstance().logWarn("IWorkbench is NULL");
@@ -94,7 +95,7 @@ class QuickFix implements IMarkerResolution {
       String lineText;
       String prevLine = null;
       try {
-        insertPosition = document.getLineOffset(lineNumber);  //PDU.getInstance().getLineStartOffset(file, lineNumber);
+        insertPosition = document.getLineOffset(lineNumber); // PDU.getInstance().getLineStartOffset(file, lineNumber);
         lineText = getLineText(document, lineNumber);
         if (lineNumber > 0) {
           prevLine = getLineText(document, lineNumber - 1);
@@ -103,26 +104,27 @@ class QuickFix implements IMarkerResolution {
         DCLogger.getInstance().logWarn(e.getMessage() + e.getStackTrace());
         return;
       }
-      
+
       String prefix = getLeadingSpaces(lineText) + getLineCommentPrefix(file);
       String postfix = "\r";
-      
+
       if (lineNumber > 0) {
-        final Pattern ignorePattern = Pattern.compile(".*" + getLineCommentPrefix(file) + ".*deepcode\\s?ignore.*(\r\n?)");
+        final Pattern ignorePattern =
+            Pattern.compile(".*" + getLineCommentPrefix(file) + ".*deepcode\\s?ignore.*(\r\n?)");
         if (ignorePattern.matcher(prevLine).matches()) {
           prefix = ",";
           postfix = "";
           insertPosition -= 1;
         }
       }
-      
-      final String[] splitedId = fullSuggestionId.split("%2F");
-      final String suggestionId = splitedId[splitedId.length - 1];
-      
+
+      // final String[] splitedId = fullSuggestionId.split("%2F");
+      // final String suggestionId = splitedId[splitedId.length - 1];
+
       final String ignoreCommand = prefix + (prefix.endsWith(" ") ? "" : " ") + (isFileIntention ? "file " : "")
-          + "deepcode ignore " + suggestionId + ": ";
+          + "deepcode ignore " + rule + ": ";
       final String ignoreDescription = "<please specify a reason of ignoring this>";
-      
+
       try {
         document.replace(insertPosition, 0, ignoreCommand + ignoreDescription + postfix);
       } catch (BadLocationException e) {
@@ -138,8 +140,8 @@ class QuickFix implements IMarkerResolution {
   @NotNull
   private static String getLineText(@NotNull IDocument document, int lineNumber) throws BadLocationException {
     return document.get(document.getLineOffset(lineNumber), document.getLineLength(lineNumber));
-//    String fileContent = HashContentUtils.getInstance().getFileContent(file);
-//    return Arrays.stream(fileContent.split("\r")).skip(lineNumber).findFirst().orElse("");
+    // String fileContent = HashContentUtils.getInstance().getFileContent(file);
+    // return Arrays.stream(fileContent.split("\r")).skip(lineNumber).findFirst().orElse("");
   }
 
   private static final String DEFAULT_LINE_COMMENT_PREFIX = "//";
