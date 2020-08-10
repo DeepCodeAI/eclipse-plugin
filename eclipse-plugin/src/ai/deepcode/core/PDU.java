@@ -212,11 +212,13 @@ public class PDU extends PlatformDependentUtilsBase {
 
   @Override
   public void showInBrowser(@NotNull String url) {
-    try {
-      PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
-    } catch (PartInitException | MalformedURLException e) {
-      dcLogger.logWarn(e.getMessage());
-    }
+    runInUIThread((shell) -> {
+      try {
+        PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
+      } catch (PartInitException | MalformedURLException e) {
+        dcLogger.logWarn(e.getMessage());
+      }
+    });
   }
 
   private void runInUIThread(Consumer<Shell> consumer) {
@@ -231,13 +233,19 @@ public class PDU extends PlatformDependentUtilsBase {
   private static boolean isNewLoginRequestShown = false;
 
   @Override
-  public void showLoginLink(Object project, String message) {
+  public void showLoginLink(@Nullable Object project, String message) {
     if (isNewLoginRequestShown)
       return;
     isNewLoginRequestShown = true;
     runInUIThread((shell) -> {
       if (MessageDialog.openConfirm(shell, title + "Login", message)) {
-        LoginUtils.getInstance().requestNewLogin(project, true);
+        RunUtils.getInstance().doBackgroundRun(project, "New Login request", (progress) -> {
+          if (LoginUtils.getInstance().checkLogin(project, false)) {
+            // in case login was done while background job been waiting (like in tests)
+            return;
+          }
+          LoginUtils.getInstance().requestNewLogin(project, true);
+        });
       } ;
       isNewLoginRequestShown = false;
     });

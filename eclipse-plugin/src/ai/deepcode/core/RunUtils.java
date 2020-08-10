@@ -37,11 +37,9 @@ public final class RunUtils extends RunUtilsBase {
   private class MyJob extends Job {
 
     private Consumer<Object> progressConsumer;
-    private IProject project;
 
-    public MyJob(@NotNull IProject project, @NotNull String title, @NotNull Consumer<Object> progressConsumer) {
+    public MyJob(@NotNull String title, @NotNull Consumer<Object> progressConsumer) {
       super(title);
-      this.project = project;
       this.progressConsumer = progressConsumer;
     }
 
@@ -63,7 +61,7 @@ public final class RunUtils extends RunUtilsBase {
   @Override
   protected void doBackgroundRun(@NotNull Object project, @NotNull String title,
       @NotNull Consumer<Object> progressConsumer) {
-    new MyJob(PDU.toProject(project), title, progressConsumer).schedule();
+    new MyJob(title, progressConsumer).schedule();
   }
 
   @NotNull
