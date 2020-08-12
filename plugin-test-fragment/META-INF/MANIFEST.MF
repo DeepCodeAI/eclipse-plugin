@@ -8,3 +8,4 @@ Fragment-Host: ai.deepcode;bundle-version="0.0.9"
 Automatic-Module-Name: plugin.test.fragment
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit;bundle-version="4.13.0"
+Import-Package: org.eclipse.core.resources

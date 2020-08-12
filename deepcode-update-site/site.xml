@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/ai.deepcode.feature_1.0.6.dev.jar" id="ai.deepcode.feature" version="1.0.6.dev">
+   <feature url="features/ai.deepcode.feature_1.0.7.dev.jar" id="ai.deepcode.feature" version="1.0.7.dev">
       <category name="ai.deepcode"/>
    </feature>
    <category-def name="ai.deepcode" label="DeepCode">

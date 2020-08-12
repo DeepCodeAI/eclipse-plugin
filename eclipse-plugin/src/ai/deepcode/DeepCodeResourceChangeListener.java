@@ -113,7 +113,7 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
 
       IResource resource = delta.getResource();
       // only interested in files, valid(accessible) files.
-      if (resource.getType() != IResource.FILE && resource.isAccessible())
+      if (resource.getType() != IResource.FILE || !resource.isAccessible())
         return true;
 
       // Proceed supported files
