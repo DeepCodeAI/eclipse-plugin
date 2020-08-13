@@ -27,7 +27,6 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
       return;
     }
 
-    // TODO delete file event
     if (event.getType() == IResourceChangeEvent.POST_CHANGE) {
 
       if (event.getDelta() == null) {
@@ -35,10 +34,11 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
       }
       IResourceDelta rootDelta = event.getDelta();
       final Set<IResource> filesChanged = new HashSet<>();
+      final Set<IFile> filesDeleted = new HashSet<>();
       final Set<IResource> ignoreFilesChanged = new HashSet<>();
 
       try {
-        rootDelta.accept(new FileChangedOrCreatedVisitor(filesChanged, ignoreFilesChanged));
+        rootDelta.accept(new FileChangedCreatedDeletedVisitor(filesChanged, filesDeleted, ignoreFilesChanged));
         rootDelta.accept(new ProjectOpenedOrCreatedVisitor());
 
       } catch (CoreException e) {
@@ -63,22 +63,39 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
               });
         }
 
-      // Rescan .dcignore and .gitignore files changed
-      for (IResource ignoreFile : ignoreFilesChanged) {
-        RunUtils.getInstance().runInBackgroundCancellable(ignoreFile, "Updating ignored files list...", (progress) -> {
-          final DeepCodeIgnoreInfoHolder ignoreHolder = DeepCodeIgnoreInfoHolder.getInstance();
-          if (ignoreHolder.is_dcignoreFile(ignoreFile))
-            ignoreHolder.update_dcignoreFileContent(ignoreFile);
-          else if (ignoreHolder.is_gitignoreFile(ignoreFile))
-            ignoreHolder.update_gitignoreFileContent(ignoreFile);
-          else
-            DCLogger.getInstance()
-                .logWarn("ignore file should be either .gitignore or .dcignore: " + ignoreFile.getName());
-        });
-      }
+      filesDeleted.stream().map(PDU.getInstance()::getProject).distinct().forEach(project -> {
+        DCLogger.getInstance().logInfo("Found " + filesDeleted.size() + " files to remove: " + filesDeleted);
+        // if too many files removed then it's easier to do full rescan
+        if (filesDeleted.size() > 10) {
+          // small delay to prevent multiple rescan Background tasks
+          RunUtils.getInstance().rescanInBackgroundCancellableDelayed(project, PDU.DEFAULT_DELAY_SMALL, true);
+        } else if (!RunUtils.getInstance().isFullRescanRequested(project)) {
+          RunUtils.getInstance().runInBackground(project,
+              "Removing " + filesDeleted.size() + " locally deleted files on server...", (progress) -> {
+                AnalysisData.getInstance().removeFilesFromCache(PDU.toObjects(filesDeleted));
+                RunUtils.getInstance().updateCachedAnalysisResults(project, Collections.emptyList(),
+                    PDU.toObjects(filesDeleted), progress);
+              });
+        }
+      });
+
       // rescan each project affected by .dcignore changes
-      ignoreFilesChanged.stream().map(PDU.getInstance()::getProject).distinct().forEach(project -> RunUtils
-          .getInstance().rescanInBackgroundCancellableDelayed(project, PDU.DEFAULT_DELAY_SMALL, true));
+      ignoreFilesChanged.stream().map(PDU.getInstance()::getProject).distinct().forEach(project -> {
+        // Rescan .dcignore and .gitignore files changed / deleted
+        RunUtils.getInstance().runInBackground(project, "Updating ignored files list...", (progress) -> {
+          for (IResource ignoreFile : ignoreFilesChanged) {
+            final DeepCodeIgnoreInfoHolder ignoreHolder = DeepCodeIgnoreInfoHolder.getInstance();
+            if (ignoreHolder.is_dcignoreFile(ignoreFile))
+              ignoreHolder.update_dcignoreFileContent(ignoreFile);
+            else if (ignoreHolder.is_gitignoreFile(ignoreFile))
+              ignoreHolder.update_gitignoreFileContent(ignoreFile);
+            else
+              DCLogger.getInstance()
+                  .logWarn("ignore file should be either .gitignore or .dcignore: " + ignoreFile.getName());
+          }
+          RunUtils.getInstance().rescanInBackgroundCancellableDelayed(project, PDU.DEFAULT_DELAY_SMALL, true);
+        });
+      });
 
       // Project closing event
     } else if (event.getType() == IResourceChangeEvent.PRE_CLOSE
@@ -93,39 +110,47 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
 
   }
 
-  private final class FileChangedOrCreatedVisitor implements IResourceDeltaVisitor {
+  private final class FileChangedCreatedDeletedVisitor implements IResourceDeltaVisitor {
     private final Set<IResource> filesChanged;
+    private final Set<IFile> filesDeleted;
     private final Set<IResource> ignoreFilesChanged;
 
-    private FileChangedOrCreatedVisitor(Set<IResource> filesChanged, Set<IResource> ignoreFilesChanged) {
+    private FileChangedCreatedDeletedVisitor(Set<IResource> filesChanged, Set<IFile> filesDeleted,
+        Set<IResource> ignoreFilesChanged) {
       this.filesChanged = filesChanged;
+      this.filesDeleted = filesDeleted;
       this.ignoreFilesChanged = ignoreFilesChanged;
     }
 
     public boolean visit(IResourceDelta delta) {
-      final boolean isResorceContentChanged = 
-          delta.getKind() == IResourceDelta.CHANGED // changed resource
+      IResource resource = delta.getResource();
+      // only interested in files.
+      if (resource.getType() != IResource.FILE)
+        return true;
+
+      final boolean isResorceContentChanged = delta.getKind() == IResourceDelta.CHANGED // changed resource
           && ((delta.getFlags() & IResourceDelta.CONTENT) != 0); // content changes
       final boolean isResourceAdded = delta.getKind() == IResourceDelta.ADDED;
-
-      if (!(isResorceContentChanged || isResourceAdded))
-        return true;
-
-      IResource resource = delta.getResource();
-      // only interested in files, valid(accessible) files.
-      if (resource.getType() != IResource.FILE || !resource.isAccessible())
-        return true;
-
-      // Proceed supported files
-      if (DeepCodeUtils.getInstance().isSupportedFileFormat((IFile) resource)) {
-        filesChanged.add(resource);
+      // only interested in valid(accessible) files here.
+      if ((isResorceContentChanged || isResourceAdded) && resource.isAccessible()) {
+        // Proceed supported files
+        if (DeepCodeUtils.getInstance().isSupportedFileFormat(resource)) {
+          filesChanged.add(resource);
+        }
+        // Proceed .dcignore and .gitignore files
+        if (DeepCodeIgnoreInfoHolder.getInstance().is_ignoreFile(resource)) {
+          ignoreFilesChanged.add(resource);
+        }
+      } else if (delta.getKind() == IResourceDelta.REMOVED) {
+        // Proceed deleted supported files
+        if (AnalysisData.getInstance().isFileInCache(resource)) {
+          filesDeleted.add((IFile) resource);
+        }
+        // Proceed deleted .dcignore and .gitignore files
+        if (DeepCodeIgnoreInfoHolder.getInstance().is_ignoreFile(resource)) {
+          ignoreFilesChanged.add(resource);
+        }
       }
-
-      // Proceed .dcignore and .gitignore files
-      if (DeepCodeIgnoreInfoHolder.getInstance().is_ignoreFile((IFile) resource)) {
-        ignoreFilesChanged.add(resource);
-      }
-
       return true;
     }
   }
@@ -137,7 +162,7 @@ final class DeepCodeResourceChangeListener implements IResourceChangeListener {
       final boolean isProjectOpenedEvent =
           delta.getKind() == IResourceDelta.CHANGED && (delta.getFlags() & IResourceDelta.OPEN) != 0;
       final boolean isProjectCreatedEvent = delta.getKind() == IResourceDelta.ADDED;
-      
+
       if (isProjectDelta && (isProjectOpenedEvent || isProjectCreatedEvent)) {
         IProject project = (IProject) resource;
         analyseProject(project);
