@@ -30,7 +30,7 @@ See below correspondent `java-client` version requirements:
 Now you should be able to:
   * [modify and run plugin](https://www.vogella.com/tutorials/EclipsePlugin/article.html#runtimeeclipse_starting) itself at `eclipse-plugin` project:
   
-![Run Eclipse](images/run-as-eclopse.jpg)
+![Run Eclipse](images/run-as-eclipse.jpg)
    
   * update needed texts and version number at `deepcode-feature` project; 
   * Build it all into update-site in `deepcode-update-site` project;
