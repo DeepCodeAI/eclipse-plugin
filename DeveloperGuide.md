@@ -29,6 +29,10 @@ Now you should be able to:
   * Build it all into update-site in `deepcode-update-site` project;
   * For running tests use `plugin-test-fragment` project and in Package Explorer select the `Run As > JUnit Plug-in Test` command.
 
+### Running tests
+__To prevent tests be blocked__  by dialogs in UI (and the annoying Eclipse Window to pop up) during testing you can [change the default test configuration to "headless mode"](https://stackoverflow.com/a/51748949/7577274)
+You'll see some internal Exceptions due to absent of Eclipse GUI components, but all tests should pass correctly.
+
 ### Manual plugin Install
 Production ready plugin should be available in Eclipse Marketplace (Help - Eclipse Marketplace...).
 

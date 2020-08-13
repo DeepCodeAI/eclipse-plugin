@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -18,8 +19,10 @@ import org.eclipse.swt.widgets.Display;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
+import ai.deepcode.core.AnalysisData;
 import ai.deepcode.core.DeepCodeParams;
 import ai.deepcode.core.LoginUtils;
+import ai.deepcode.core.RunUtils;
 
 public class DeepCodeTest {
 
@@ -41,7 +44,7 @@ public class DeepCodeTest {
 
   @Test
   public void _10_LoginTest() {
-    showInfo("-------------------10_Login_Test--------------------");
+    showInfo("\n-------------------10_Login_Tests--------------------");
     // waitForJobs();
     // boolean isLogged[] = {false};
     // new BackgroundJob("LoginTest", () -> {
@@ -64,25 +67,46 @@ public class DeepCodeTest {
 
   @Test
   public void _20_ProjectTest() throws CoreException {
-    showInfo("-------------------20_Project_Test--------------------");
+    showInfo("\n-------------------20_Project_Tests--------------------");
 
     String name = "DeepCodeTestProject";
     IProjectDescription projectDescription = ResourcesPlugin.getWorkspace().newProjectDescription(name);
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
 
-    // TODO check project with NOT given consent should not be analyzed
-    DeepCodeParams.getInstance().setConsentGiven(project);
-
     project.create(projectDescription, new NullProgressMonitor());
     project.open(new NullProgressMonitor());
+    showInfo("Project `DeepCodeTestProject` opened.");
+
     IFile file = project.getFile("cppTestFile.cpp");
     InputStream source = getClass().getClassLoader().getResourceAsStream("testData/sampleFile.cpp");
     file.create(source, IFile.FORCE, null);
     showInfo("`cppTestFile.cpp` file created.");
 
     waitForJobs();
+
+    // check project with NOT given consent should not be analyzed
+    showInfo("-------------------testNoAnalysisForProjectWithoutConsent--------------------");
+    assertFalse("Consent should NOT be in given at this stage.", DeepCodeParams.getInstance().consentGiven(project));
+    Set<Object> allCachedProject = AnalysisData.getInstance().getAllCachedProject();
+    assertTrue("Project without given Consent should NOT be in cache.", allCachedProject.isEmpty());
+
+    DeepCodeParams.getInstance().setConsentGiven(project);
+    showInfo("Project `DeepCodeTestProject` CONSENT given.");
     
-    // TODO assert file is analyzed
+    RunUtils.getInstance().asyncAnalyseProjectAndUpdatePanel(project);
+
+    waitForJobs();
+
+    showInfo("-------------------testProjectInCache--------------------");
+    allCachedProject = AnalysisData.getInstance().getAllCachedProject();
+    assertTrue("Current Project should be in cache.",
+        allCachedProject.size() == 1 && allCachedProject.contains(project));
+
+    showInfo("-------------------testFileInCache--------------------");
+    assertTrue("Test file is not in cache", AnalysisData.getInstance().isFileInCache(file));
+    final Set<Object> filesWithSuggestions = AnalysisData.getInstance().getAllFilesWithSuggestions(project);
+    assertFalse("List of Files with suggestions is empty", filesWithSuggestions.isEmpty());
+    assertTrue("Test file has no suggestions in cache", filesWithSuggestions.contains(file));
   }
 
 
