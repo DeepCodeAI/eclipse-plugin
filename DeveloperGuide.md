@@ -9,10 +9,14 @@ Read more about Eclipse plugin concepts at official Eclipse [Plug-in Development
 
 ### Build
 
-- Clone this repository: `git clone https://github.com/DeepCodeAI/eclipse-plugin.git` 
-- Make sure [Eclipse IDE for Eclipse Committers](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-eclipse-committers) installed along with Java 8 (preferably 11) or above;
-- Open root eclipse-plugin Directory from `File - Open Projects from File System...`; After all steps in wizard you should have all 3 projects mentioned above opened in your Workbench.
+- Clone this repository: `git clone https://github.com/DeepCodeAI/eclipse-plugin.git` and checkout desired branch;
 - Place `java-client-{X.X.X}-all.jar` into `..\eclipse-plugin\libs` dir (see [java-client](https://github.com/DeepCodeAI/java-client) repository for instruction how to build it);
+- Make sure [Eclipse IDE for Eclipse Committers](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-eclipse-committers) installed along with Java 8 (preferably 11) or above;
+- Open root `eclipse-plugin` Directory from `File - Open Projects from File System...` and make sure root dir is  __unselected__  as shown below:
+
+![Open projects](images/open-projects.jpg)
+
+After all steps in wizard you should have all 4 projects mentioned above opened in your Workbench.
 
 See below correspondent `java-client` version requirements:
 
@@ -24,13 +28,18 @@ See below correspondent `java-client` version requirements:
 - Modify `.classpath` file inside `plugin-test-fragment` project to provide path to `java-client-{X.X.X}-all.jar` location;
 
 Now you should be able to:
-  * [modify and run plugin](https://www.vogella.com/tutorials/EclipsePlugin/article.html#runtimeeclipse_starting) itself at `eclipse-plugin` project; 
+  * [modify and run plugin](https://www.vogella.com/tutorials/EclipsePlugin/article.html#runtimeeclipse_starting) itself at `eclipse-plugin` project:
+  
+![Run Eclipse](images/run-as-eclopse.jpg)
+   
   * update needed texts and version number at `deepcode-feature` project; 
   * Build it all into update-site in `deepcode-update-site` project;
-  * For running tests use `plugin-test-fragment` project and in Package Explorer select the `Run As > JUnit Plug-in Test` command.
+  * For running tests use `plugin-test-fragment` project and in Package Explorer select the `Run As > JUnit Plug-in Test` command:
+  
+![Run Tests](images/run-as-test.jpg)
 
 ### Running tests
-__To prevent tests be blocked__  by dialogs in UI (and the annoying Eclipse Window to pop up) during testing you can [change the default test configuration to "headless mode"](https://stackoverflow.com/a/51748949/7577274)
+__To prevent tests be blocked__  by dialogs in UI (and the annoying Eclipse Window to pop up) during testing make sure the default test configuration is in ["headless mode"](https://stackoverflow.com/a/51748949/7577274)
 You'll see some internal Exceptions due to absent of Eclipse GUI components, but all tests should pass correctly.
 
 ### Manual plugin Install
