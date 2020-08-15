@@ -60,7 +60,8 @@ Before publishing following two jar files need to be signed inside `deepcode-upd
 `deepcode-update-site/plugins/ai.deepcode_{X.X.X}.jar`
 
 [Quick signing tutorial](https://stackoverflow.com/questions/17187520/signing-jar-file)
-[Formal Oracle doc](https://wiki.eclipse.org/JAR_Signing)
+
+[Formal Eclipse doc](https://wiki.eclipse.org/JAR_Signing)
 
 ### Useful links
 
