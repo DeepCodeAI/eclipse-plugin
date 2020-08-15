@@ -53,7 +53,14 @@ If you need to test pure plugin *.jar on another Eclipse IDE instance without up
 
 ### JAR Signing
 
-ToDo [JAR Signing](https://wiki.eclipse.org/JAR_Signing)
+Before publishing following two jar files need to be signed inside `deepcode-update-site` project with `jarsigner` tool (see links below please):
+
+`deepcode-update-site/features/ai.deepcode.feature_{X.X.X}.jar`
+
+`deepcode-update-site/plugins/ai.deepcode_{X.X.X}.jar`
+
+[Quick signing tutorial](https://stackoverflow.com/questions/17187520/signing-jar-file)
+[Formal Oracle doc](https://wiki.eclipse.org/JAR_Signing)
 
 ### Useful links
 
