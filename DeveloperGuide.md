@@ -39,8 +39,14 @@ Now you should be able to:
 ![Run Tests](images/run-as-test.jpg)
 
 ### Running tests
-__To prevent tests be blocked__  by dialogs in UI (and the annoying Eclipse Window to pop up) during testing make sure the default test configuration is in ["headless mode"](https://stackoverflow.com/a/51748949/7577274)
+- __To prevent tests be blocked__  by dialogs in UI (and the annoying Eclipse Window to pop up) during testing make sure the default test configuration is in ["headless mode"](https://stackoverflow.com/a/51748949/7577274)
 You'll see some internal Exceptions due to absent of Eclipse GUI components, but all tests should pass correctly.
+
+- 2 environment variables with __already logged__ Tokens need to be declared:
+
+`deepcode.ai_token` - logged at https://www.deepcode.ai Token 
+
+`deepcoded.com_token` - logged at https://www.deepcoded.com Token
 
 ### Manual plugin Install
 Production ready plugin should be available in Eclipse Marketplace (Help - Eclipse Marketplace...).
