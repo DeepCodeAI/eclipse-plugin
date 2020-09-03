@@ -70,12 +70,12 @@
 	  <menuContribution locationURI="toolbar:ai.deepcode.parts.myProblemsView?after=additions">
          <command
                commandId="ai.deepcode.analyse"
-               icon="icons/show.png"
+               icon="icons/show_dark.png"
                tooltip="Run full analysis">
          </command>
          <command
                commandId="ai.deepcode.show_settings"
-               icon="icons/settings.png"
+               icon="icons/settings_dark.png"
                tooltip="Show DeepCode Preferences">
          </command>
       </menuContribution>

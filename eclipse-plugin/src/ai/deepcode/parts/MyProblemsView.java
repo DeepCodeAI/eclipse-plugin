@@ -90,15 +90,15 @@ public class MyProblemsView extends ProblemsView /* MarkerSupportView */ {
       // getting field with MarkerTypeFieldFilter responsible for filtering by marker type
       Field fieldFilters = classMarkerFieldFilterGroup.getDeclaredField("fieldFilters");
       fieldFilters.setAccessible(true);
-      MarkerFieldFilter[] MarkerFieldFilters = (MarkerFieldFilter[]) fieldFilters.get(filter);
+      MarkerFieldFilter[] markerFieldFilters = (MarkerFieldFilter[]) fieldFilters.get(filter);
       MarkerTypeFieldFilter markerTypeFieldFilter = null;
-      for (MarkerFieldFilter markerFieldFilter : MarkerFieldFilters) {
+      for (MarkerFieldFilter markerFieldFilter : markerFieldFilters) {
         if (markerFieldFilter instanceof MarkerTypeFieldFilter) {
           markerTypeFieldFilter = (MarkerTypeFieldFilter) markerFieldFilter;
         }
       }
       if (markerTypeFieldFilter == null)
-        throw new NoSuchFieldException("No MarkerTypeFieldFilter at: " + MarkerFieldFilters);
+        throw new NoSuchFieldException("No MarkerTypeFieldFilter at: " + markerFieldFilters);
       
       // actually set to show only DeepCode type markers
       Field selectedTypes = MarkerTypeFieldFilter.class.getDeclaredField("selectedTypes");

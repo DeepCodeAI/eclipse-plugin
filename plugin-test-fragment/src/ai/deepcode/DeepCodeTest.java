@@ -27,10 +27,8 @@ import ai.deepcode.core.RunUtils;
 public class DeepCodeTest {
 
   // !!! Will works only with already logged Token
-  // file deepcode ignore NonCryptoHardcodedSecret/test: hard-coded test tokens
-  protected static final String loggedToken = "7803ae6756d34b5cec056616fd59f4d6e499fce7fc3ce6db5cfd07f6e893e23a";
-  protected static final String loggedToken_DeepCoded =
-      "3323bb63463aed49e194fcfe5455da9f338763ef2d8a6e2516ab5c81a184fa93";
+  protected static final String loggedToken = System.getenv("deepcode.ai_token");
+  protected static final String loggedToken_DeepCoded = System.getenv("deepcoded.com_token");
 
   /**
    * Perform pre-test initialization.
