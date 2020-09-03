@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="ai.deepcode.feature"
+      label="DeepCode feature"
+      version="1.0.7.dev"
+      provider-name="deepcode.ai">
+
+   <description url="https://github.com/DeepCodeAI/eclipse-plugin/blob/master/README.md">
+      DeepCode finds bugs, security vulnerabilities, performance and API issues based on AI. 
+DeepCode&apos;s speed of analysis allow us to analyse your code in real time and deliver results when you hit the save button in your IDE. 
+We support Java, C/C++, Python, JavaScript and TypeScript.
+   </description>
+
+   <copyright url="https://www.deepcode.ai/">
+      Deepcode AG, Kasinostrasse 10, 8032 Zürich, Switzerland
+   </copyright>
+
+   <license url="https://opensource.org/licenses/MIT">
+      MIT License
+
+Copyright (c) 2020 DeepCodeAI
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+   </license>
+
+   <plugin
+         id="ai.deepcode"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

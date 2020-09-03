@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+	<extension point="org.eclipse.ui.views">
+		<category
+			name="DeepCode"
+			id="ai.deepcode">
+		</category>
+		<view
+			name="DeepCode Problems View"
+            icon="icons/logo.png"
+			categoryId="ai.deepcode"
+			class="ai.deepcode.parts.MyProblemsView"
+			id="ai.deepcode.parts.myProblemsView">
+		</view>
+	</extension>
+	
+	<extension	point="org.eclipse.ui.commands">
+	  <category
+          description="DeepCode specific commands."
+          id="ai.deepcode"
+          name="DeepCode">
+      </category>
+      <command
+            id="ai.deepcode.analyse"
+            defaultHandler="ai.deepcode.handlers.AnalysisHandler"
+			categoryId="ai.deepcode"
+            name="Full analysis">
+      </command>
+      <command
+            id="ai.deepcode.show_settings"
+            defaultHandler="ai.deepcode.handlers.ShowSettingsHandler"
+			categoryId="ai.deepcode"
+            name="Show DeepCode Preferences">
+      </command>
+      <command
+            id="ai.deepcode.showWebCommandId"
+            defaultHandler="ai.deepcode.handlers.ShowWebResultsHandler"
+			categoryId="ai.deepcode"
+            name="Open Results in Browser">
+            	<commandParameter id="ai.deepcode.params.project" name="Project"/>
+      </command>
+      <command
+            id="ai.deepcode.errorIconCommand"
+            defaultHandler="ai.deepcode.handlers.ErrorIconClickedHandler"
+			categoryId="ai.deepcode"
+            name="DeepCode: errorIconClicked">
+      </command>
+      <command
+            id="ai.deepcode.warnIconCommand"
+            defaultHandler="ai.deepcode.handlers.WarnIconClickedHandler"
+			categoryId="ai.deepcode"
+            name="DeepCode: warnIconClicked">
+      </command>
+      <command
+            id="ai.deepcode.infoIconCommand"
+            defaultHandler="ai.deepcode.handlers.InfoIconClickedHandler"
+			categoryId="ai.deepcode"
+            name="DeepCode: infoIconClicked">
+      </command>
+      <command
+            id="ai.deepcode.emptyCommand"
+			categoryId="ai.deepcode"
+			name = "DeepCode: empty command">
+      </command>
+	</extension>
+	
+    <extension point="org.eclipse.ui.menus">
+	  <menuContribution locationURI="toolbar:ai.deepcode.parts.myProblemsView?after=additions">
+         <command
+               commandId="ai.deepcode.analyse"
+               icon="icons/show_dark.png"
+               tooltip="Run full analysis">
+         </command>
+         <command
+               commandId="ai.deepcode.show_settings"
+               icon="icons/settings_dark.png"
+               tooltip="Show DeepCode Preferences">
+         </command>
+      </menuContribution>
+	  <menuContribution locationURI="menu:ai.deepcode.parts.myProblemsView?after=additions">
+         <menu
+               label="Open Results in Browser"
+               icon="icons/web.png"
+               tooltip="Open Results in Browser">
+               		<dynamic class="ai.deepcode.ShowWebResultsCompoundContributionItem" id ="ai.deepcode.ShowWebResults"/>
+         </menu>
+      </menuContribution>
+
+	  <menuContribution locationURI="toolbar:org.eclipse.ui.trim.status?after=org.eclipse.ui.StatusLine">
+         <toolbar id="ai.deepcode.toolbars.status" label="DeepCode status bar">
+            <command 
+            	commandId="ai.deepcode.errorIconCommand"
+            	label="?"            	
+            	tooltip="DeepCode: Errors found"
+            	icon="icons/error_gray.png"
+            	mode="FORCE_TEXT"/>
+            <command 
+            	commandId="ai.deepcode.warnIconCommand"
+            	label="?"            	
+            	tooltip="DeepCode: Warnings found"
+            	icon="icons/warn_gray.png"
+            	mode="FORCE_TEXT"/>
+            <command 
+            	commandId="ai.deepcode.infoIconCommand"
+            	label="?"            	
+            	tooltip="DeepCode: Infos found"
+            	icon="icons/info_gray.png"
+            	mode="FORCE_TEXT"/>         
+            <command 
+            	commandId="ai.deepcode.emptyCommand"
+            	label="_"            	
+            	tooltip=" "
+            	mode="FORCE_TEXT"/>         
+         </toolbar>
+      </menuContribution>
+	</extension>
+	
+    <extension
+          id="deepcodemarker"
+          name="DeepCode"
+          point="org.eclipse.core.resources.markers">
+       <persistent
+             value="false">
+       </persistent>
+       <super
+             type="org.eclipse.core.resources.problemmarker">
+       </super>
+    </extension>
+
+   <extension point="org.eclipse.ui.ide.markerResolution">
+      <markerResolutionGenerator
+         markerType="ai.deepcode.deepcodemarker"
+         class="ai.deepcode.quickfix.IgnoreSugestion"/>
+   </extension>
+
+   <extension point="org.eclipse.ui.startup">
+     <startup class="ai.deepcode.parts.StartupClass"/>
+   </extension>
+   
+   <extension point="org.eclipse.ui.preferencePages">
+      <page
+            class="ai.deepcode.parts.DeepCodePrefPage"
+            id="ai.deepcode.preferences"
+            name="DeepCode Preferences">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="ai.deepcode.parts.DeepCodePreferenceInitializer">
+      </initializer>
+   </extension>
+</plugin>
