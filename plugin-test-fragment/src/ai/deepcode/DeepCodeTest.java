@@ -27,8 +27,8 @@ import ai.deepcode.core.RunUtils;
 public class DeepCodeTest {
 
   // !!! Will works only with already logged Token
-  protected static final String loggedToken = System.getenv("deepcode.ai_token");
-  protected static final String loggedToken_DeepCoded = System.getenv("deepcoded.com_token");
+  protected static final String loggedToken = System.getenv("DEEPCODE_API_KEY");
+  protected static final String loggedToken_DeepCoded = System.getenv("DEEPCODE_API_KEY_STAGING");
 
   /**
    * Perform pre-test initialization.

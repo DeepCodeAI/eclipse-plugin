@@ -44,9 +44,9 @@ You'll see some internal Exceptions due to absent of Eclipse GUI components, but
 
 - 2 environment variables with __already logged__ Tokens need to be declared:
 
-`deepcode.ai_token` - logged at https://www.deepcode.ai Token 
+`DEEPCODE_API_KEY` - logged at https://www.deepcode.ai Token 
 
-`deepcoded.com_token` - logged at https://www.deepcoded.com Token
+`DEEPCODE_API_KEY_STAGING` - logged at https://www.deepcoded.com Token
 
 ### Manual plugin Install
 Production ready plugin should be available in Eclipse Marketplace (Help - Eclipse Marketplace...).
