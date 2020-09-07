@@ -6,15 +6,75 @@ Through the extension you can quickly start using DeepCode's code review and ana
 
 ## DeepCode's AI Engine finds bugs
 
-DeepCode uses symbolic AI to process hundreds of millions of commits in open source software projects and learns how to find serious coding issues. Because the platform determines the intent of the code — and not only the syntax mistakes — DeepCode identifies 10x more critical bugs and security vulnerabilities than other tools. 
+DeepCode uses symbolic AI to process hundreds of millions of commits in open source software projects and learns how to find serious coding issues. Because the platform determines the intent of the code ï¿½ and not only the syntax mistakes ï¿½ DeepCode identifies 10x more critical bugs and security vulnerabilities than other tools. 
 
 ## Our AI provides explanation behind found bugs
 
-In order to show the detailed explanation of a potential bug, we introduced a new AI technique called _Ontology_. With Ontology, we’ve integrated the capability to present logical argumentation used by the DeepCode engine. 
+In order to show the detailed explanation of a potential bug, we introduced a new AI technique called _Ontology_. With Ontology, weï¿½ve integrated the capability to present logical argumentation used by the DeepCode engine. 
 
-## Supported languages and PLatforms
+## Supported languages and Platforms
 
-JavaScript, TypeScript, Java, C/C++, and Python are currently supported.
+JavaScript, TypeScript, Java, C/C++, and Python are currently supported. We supprt Eclipse 2019-03 and later.
+
+# Installation
+
+The installation is pretty straight forward. The DeepCode plug in is available on the [Eclipse Marketplace](https://marketplace.eclipse.org/content/deepcode#group-details). You can either follow the steps below or simply click on this button here: [![Drag to your running Eclipse* workspace. *Requires Eclipse Marketplace Client](https://marketplace.eclipse.org/sites/all/themes/solstice/public/images/marketplace/btn-install.svg)](http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=5220463 "Drag to your running Eclipse* workspace. *Requires Eclipse Marketplace Client")
+
+## Installation Steps
+ 
+_Side Note:_ Make sure to have Eclipse 2019-03 or later. You can check under _Help_ - _About Eclipse_ - _Version_.
+
+(1) Open the Eclipse Marketplace within Eclipse under _Help_ - _Eclipse Marketplace_:
+ ![Marketplace Entry](images/Install_Eclipse_Marketplace.png)
+
+(2) Search for _DeepCode_ by typing it into the search bar and pressing _Go_: 
+ ![DeepCode in the Eclipse Marketplace](images/Search_Eclipse_Marketplace.png)
+
+_Side Note:_ When you do not find DeepCode, make sure you selected the Eclipse Marketplace in the Marketplace selectors.
+
+(3) Click _Install_ on the bottom right of the entry.
+
+(4) Eclipse will ask to accept the MIT license of DeepCode. Click on _I accept_ and _Finish_:
+
+ ![Accept MIT license](images/Accept_Eclipse_License.png)
+
+(5) Finally, restart Eclipse - done
+
+ ![Restart Eclipse](images/Restart_Eclipse.png)
+
+## Authenticate to DeepCode Online Service
+
+When starting the first time or when your API key has been deleted or invalidated, the DeepCode plugin will ask you to authenticate.
+
+ ![Authentication request](images/Authenticate_Eclipse.png)
+
+You will be redirected to a web browser and asked to login using either Github, Gitlab, or Bitbucket account. In the background, a key will be generated and stored to be used in the future.
+
+# How to use it?
+
+## Configuration
+
+Under _Windows_ - _Preferences_ you will find the _DeepCode Preferences_ entry:
+
+ ![DeepCode Configuration Window](images/Configuration_Eclipse_PlugIn.png)
+
+_DeepCode Server instance URL_ Per default, the DeepCode public internet facing server instance is chosen. But, if you have a DeepCode Docker instance running, you can target your internal instance by using this entry. Just enter the address of your internal server.
+
+_TokenId_ is the token that was either acquired by the process described above or manually on the DeepCode dashboard. When deleting this entry, you force the plugin into the token acquisition. 
+
+_Min Severity level to show_ offers the opportunity to dial down on the suggestions you get.
+
+_Add Linters analysis_ DeepCode offers to add linter feedback like ESLint. You might have this in your IDE already and don't want to duplicate results.
+
+## Usage
+
+_Side Note:_ You can find the DeepCode in _Window_ - _Show View_ - _Other_
+
+![DeepCode View](images/DeepCode_View_Eclipse.png)
+
+Opening a new project will ask you for approval to scan the project. You will then see the results displayed in the bottom bar of Eclipse.
+
+
 
 # Feedback and contact
 
