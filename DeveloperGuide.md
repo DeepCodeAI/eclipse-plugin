@@ -69,6 +69,8 @@ Before publishing following two jar files need to be signed inside `deepcode-upd
 
 [Formal Eclipse doc](https://wiki.eclipse.org/JAR_Signing)
 
+Current certificate is issued on 2020-09-09. Make sure you re-issue it every 90 days or buy one with 1-year validity. [Certification site](https://app.zerossl.com/)
+
 ### Useful links
 
 - official Eclipse [Platform Plug-in Developer Guide](https://help.eclipse.org/2020-06/index.jsp?nav=%2F2), in particular:
