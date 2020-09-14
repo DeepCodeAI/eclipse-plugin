@@ -74,7 +74,29 @@ _Side Note:_ You can find the DeepCode in _Window_ - _Show View_ - _Other_
 
 Opening a new project will ask you for approval to scan the project. You will then see the results displayed in the bottom bar of Eclipse.
 
+![Using DeepCode](images/Usage_Eclipse.png)
 
+As you can see on the bottom here, our project has two severe, 27 Warnings, and 24 Infos. You can click on the bottom info to open the _Problems View_. Clicking on the arrow symbol collapses or expands the list of suggestions and you see some information like filename, path, location line displayed in the table.
+
+On the top right of the view, you can find a bar with symbols. First, there is a filter funnel. By clicking on the funnel, the filters window opens and you can define the type, the scope of issues you want to see listed. You can also define filters on the Description text.
+
+_Side Note:_ Eclipse does not show when a filter is applied. Make sure to check from time to time so you do not accidentially filter out important information.
+
+Next in line is the eye shaped icon (_Run full analysis_), which triggers a re-analysis of your project.
+
+Next is the wrench icon (_Preferences_), which opens the preferences window as explained above.
+
+The three dots in a vertical line (_Open Results in Browser_), opens the DeepCode dashboard for your project on the assigned DeepCode server. 
+
+_Side Note:_ DeepCode caches the results for 24h and then regularly purges the cache. If the last scan is older than 24h, the results might no longer be present. Simply rescan (using the eye icon).
+
+The last two icons are to minimize and maximize the view window.
+
+When you hover over a suggestion in your code, the following overlay is shown:
+
+![Hover over Result](images/HoverResult_Eclipse.png)
+
+Beside giving you results and context, DeepCode provides two options to add a comment to ignore this particular suggestion. Either for this specific incident or for the whole file. If you click on one of those, a short comment is inserted making DeepCode ignoring the specific suggestion and asking you to leave a comment for yourself or your colleagues on why you did this ignore.
 
 # Feedback and contact
 
