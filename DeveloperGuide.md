@@ -65,13 +65,11 @@ Before publishing following two jar files need to be signed inside `deepcode-upd
 
 `deepcode-update-site/plugins/ai.deepcode_{X.X.X}.jar`
 
-Deprecated: keytool -import -alias bundle -trustcacerts -file ./ca_bundle.crt -keystore ./deepcode.ai.jks
-
 Example:
 ```bash
-openssl pkcs12 -in deepcode.ai.pfx -out deepcode.ai.pem
-openssl pkcs12 -export -in deepcode.ai.pem -out deepcode.ai.p12 -name "deepcode.ai"
-keytool -importkeystore -srckeystore ./deepcode.ai.p12 -srcstoretype PKCS12 -destkeystore ./deepcode.ai.jks -deststoretype pkcs12 -trustcacerts
+keytool -importkeystore -srckeystore ./deepcode.ai.pfx -srcstoretype PKCS12 -destkeystore ./deepcode.ai.jks -deststoretype pkcs12 -trustcacerts
+jarsigner -keystore ./deepcode.ai.jks ./deepcode-update-site/features/ai.deepcode.feature_{X.X.X}.dev.jar deepcode.ai
+jarsigner -keystore ./deepcode.ai.jks ./deepcode-update-site/plugins/ai.deepcode_{X.X.X}.jar deepcode.ai
 ```
 
 
