@@ -30,5 +30,9 @@ public final class DeepCodeIgnoreInfoHolder extends DeepCodeIgnoreInfoHolderBase
     return PDU.toIFile(file).getParent().getFullPath().toString();
   }
 
+  @Override
+  protected Object getProjectOfFile(@NotNull Object file) {
+    return PDU.toIFile(file).getProject();
+  }
 
 }
