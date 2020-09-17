@@ -24,6 +24,7 @@ See below correspondent `java-client` version requirements:
 |------------------|-------------|
 | 0.0.9            | 2.0.10      |
 | 0.0.11           | 2.0.12      |
+| 0.0.17           | 2.0.17      |
 
 - Modify `.classpath` file inside `plugin-test-fragment` project to provide path to `java-client-{X.X.X}-all.jar` location;
 
