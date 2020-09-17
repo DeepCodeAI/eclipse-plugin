@@ -2,7 +2,7 @@
 <feature
       id="ai.deepcode.feature"
       label="DeepCode feature"
-      version="1.0.11.dev"
+      version="1.0.12.dev"
       provider-name="deepcode.ai">
 
    <description url="https://github.com/DeepCodeAI/eclipse-plugin/blob/master/README.md">
